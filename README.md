@@ -6,6 +6,15 @@
 
 In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt.
 
+## Command Lines Guidance
+Please run `pip install -r requirements.txt` to install all the dependencies right now, we will use `environment.yml` file later. \
+You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
+run the bash file in command line to download zipped images from kaggle website and unzip them:  \
+```shell
+chmod +x get_images.sh
+bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
+```
+
 ## Project Organization
 
 ```
