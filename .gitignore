@@ -171,3 +171,5 @@ cython_debug/
 
 # kaggel
 .kaggle
+
+/data
