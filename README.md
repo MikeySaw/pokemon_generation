@@ -8,14 +8,26 @@
 
 In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt.
 
-## Command Lines Guidance
-Please run `pip install -r requirements.txt` to install all the dependencies right now, we will use `environment.yml` file later. \
+## Experiment Command Lines Guidance(Experiments Version)
+Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
-run the bash file in command line to download zipped images from kaggle website and unzip them:  \
+run the following commands in command line to download zipped images from kaggle website and unzip them:
 ```shell
 chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
+
+run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
+```shell
+# Ignore the first line if you have not installed dvc yet
+pip uninstall dvc
+pip install dvc==3.50.1
+pip install dvc-gs
+
+# test if the dvc is working on your PC/System
+dvc pull
+```
+
 
 ## Project Organization
 
