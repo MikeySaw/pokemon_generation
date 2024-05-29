@@ -1,6 +1,6 @@
 import click
 import torch
-from models.model import ResNet18
+from torchvision.models import resnet18
 from data.make_dataset import corrupted_dataset
 
 from tqdm import tqdm
@@ -30,7 +30,7 @@ def cli():
 @click.option("--path", default="data/raw/corruptmnist", help="path to the corrupted data")
 def train(lr: float, epochs: int, train_batch_size: int, log_frequency: int, device: torch.device, path: str):
     """Train a model on MNIST."""
-    model = ResNet18()
+    model = resnet18(pretrained=False, num_classes=10)
     train_set, _ = corrupted_dataset(path=path)
 
     train_loader = torch.utils.data.DataLoader(
