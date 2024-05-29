@@ -7,6 +7,7 @@
 In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt.
 
 ## Experiment Command Lines Guidance(Experiments Version)
+### Data Download Part
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
 run the following commands in command line to download zipped images from kaggle website and unzip them:
@@ -14,7 +15,7 @@ run the following commands in command line to download zipped images from kaggle
 chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
-
+### Data Version Control Test
 run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 ```shell
 # Ignore the first line if you have not installed dvc yet
@@ -25,7 +26,18 @@ pip install dvc-gs
 # test if the dvc is working on your PC/System
 dvc pull
 ```
+### Dockerfile Test
+please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile. 
+to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
+to build and test this toy example dockerfile, simply run the following command:
+```shell
+# build dockerfile
+sudo docker build -f test_trainer.dockerfile . -t test_trainer:latest
 
+# test dockerfile
+sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
+```
+__make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
 
 ## Project Organization
 
