@@ -4,3 +4,5 @@ dvc[gs]
 wandb
 tqdm
 click
+torch
+torchvision
