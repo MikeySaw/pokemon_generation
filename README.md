@@ -41,6 +41,50 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 ```
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
 
+### Model Building and Multi-GPUs training with Diffusers and Huggingface
+To train a diffusion model with Multi-GPUs and algorithm like `LoRA`, please run the following commands:
+```shell
+pip install accelerate
+pip install git+https://github.com/huggingface/diffusers
+# Instead you can install by using pip install -r requirements.txt
+
+# Initialize the config for the accelerate
+accelerate config
+
+# Train the model by using the following script
+export MODEL_NAME="runwayml/stable-diffusion-v1-5"
+export OUTPUT_DIR="models/finetune/lora"
+export HUB_MODEL_ID="pokemon-lora"
+export DATASET_NAME="data/raw"
+
+accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.py \
+--pretrained_model_name_or_path=$MODEL_NAME \
+--dataset_name=$DATASET_NAME \
+--dataloader_num_workers=8 \
+--resolution=224 \
+--center_crop \
+--random_flip \
+--train_batch_size=1 \
+--gradient_accumulation_steps=4 \
+--max_train_steps=15000 \
+--learning_rate=1e-04 \
+--max_grad_norm=1 \
+--lr_scheduler="cosine" \
+--lr_warmup_steps=0 \
+--output_dir=${OUTPUT_DIR} \
+--push_to_hub \
+--hub_model_id=${HUB_MODEL_ID} \
+--report_to=wandb \
+--checkpointing_steps=500 \
+--validation_prompt="A naruto with blue eyes." \
+--multi_gpu 2 \
+--seed=42
+```
+Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them. 
+
+### Dataset Structure
+Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
+
 ## Project Organization
 
 ```
