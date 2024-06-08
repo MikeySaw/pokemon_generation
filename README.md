@@ -28,6 +28,26 @@ pip install dvc-gs
 # test if the dvc is working on your PC/System
 dvc pull
 ```
+
+### Hydra Test
+please check the `conf` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `conf/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
+```shell
+# @package _global_
+``` 
+at the beginning of your yaml files so that later we can directly change the config files we gonna use from command line like this way: 
+```shell
+# change the default hyperparameter values tom values inside the train_1.yaml file
+python train.py config=train_1.yaml
+```
+The structure of this folder should always looks similar to this one: 
+```shell
+├── conf
+├── config.yaml
+└── experiments
+    ├── train_1.yaml
+    └── train_2.yaml
+```
+
 ### Dockerfile Test
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile. 
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
