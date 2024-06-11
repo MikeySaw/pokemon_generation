@@ -1,4 +1,6 @@
 import os
+import hydra 
+from omegaconf import OmegaConf
 from loguru import logger
 
 from PIL import Image
@@ -26,27 +28,31 @@ class PokemonDataset(Dataset):
         return image 
 
 
-def main():
-    logger.info(f"Loading images from {"data/raw"}...")
+@hydra.main(config_path='../config', config_name='default_config.yaml')
+def main(config):
+    logger.info(f"configuration: \n {OmegaConf.to_yaml(config)}")
+    logger.info(f"Loading images...")
+
+    data_params = config.dataset
     
     transform = transforms.Compose([
-        transforms.Resize((TENSOR_SIZE)),
+        transforms.Resize(data_params['image_size']),
         transforms.ToTensor()
     ])
 
+    print(data_params['image_size'])
+    # that line is here because hydra changes the current workind directory
+    os.chdir('../../..')
     # check if processed datafolder exists, otherwise create it
-    if not os.path.exists(PROCESSED_DATA_DIR):
-        os.makedirs(PROCESSED_DATA_DIR)
+    if not os.path.exists(data_params['processed_path']):
+        os.makedirs(data_params['processed_path'])
 
-    dataset = PokemonDataset(image_folder=RAW_DATA_DIR, transform=transform)
-    torch.save(dataset, os.path.join(PROCESSED_DATA_DIR, 'pokemon.pth'))
+    dataset = PokemonDataset(image_folder=data_params['image_path'], transform=transform)
+    torch.save(dataset, os.path.join(data_params['processed_path'], 'pokemon.pth'))
     
-    logger.info(f"Created dataset and saved at {os.path.join(PROCESSED_DATA_DIR, 'pokemon.pth')}")
+    logger.info(f"Created dataset and saved at {os.path.join(data_params['processed_path'], 'pokemon.pth')}")
 
     
 if __name__ == "__main__": 
-    TENSOR_SIZE = (128, 128) # you can change the size of the images here (TODO: Move this to hydra config)
-    PROCESSED_DATA_DIR = "data/processed"
-    RAW_DATA_DIR = "data/raw"
     main()
     
