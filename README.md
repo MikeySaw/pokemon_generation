@@ -105,6 +105,12 @@ Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them.
 ### Dataset Structure
 Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
 
+## To Do/Try to do
+Some tests will be done in the coming weeks, right now what we need to change inside the things we already have done would be:
+- [ ] Check/Fix the paths inside different test files.
+- [ ] Get a more easier to test model to replace the one inside the `, the SD model right now requires huge GPU RAM to test
+- [ ] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters, 
+
 ## Project Organization
 
 ```
