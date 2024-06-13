@@ -1,0 +1,4 @@
+defaults:
+  - training_params: training0
+  - paths: training_paths0
+  - model_params: model0
