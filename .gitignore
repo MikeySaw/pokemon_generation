@@ -174,4 +174,5 @@ cython_debug/
 /data
 
 #hydra
-outputs
+hydra_logs/training_outputs/*
+!hydra_logs/training_outputs/.gitkeep
