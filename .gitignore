@@ -172,3 +172,7 @@ cython_debug/
 # kaggel
 .kaggle
 /data
+
+#hydra
+hydra_logs/training_outputs/*
+!hydra_logs/training_outputs/.gitkeep

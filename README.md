@@ -30,7 +30,7 @@ dvc pull
 ```
 
 ### Hydra Test
-please check the `conf` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `conf/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
+please check the `src/config` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 ```shell
 # @package _global_
 ``` 
@@ -41,8 +41,8 @@ python train.py config=train_1.yaml
 ```
 The structure of this folder should always looks similar to this one: 
 ```shell
-├── conf
-├── config.yaml
+├── config
+├── default_config.yaml
 └── experiments
     ├── train_1.yaml
     └── train_2.yaml
@@ -102,6 +102,37 @@ accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.p
 ```
 Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them. 
 
+### Run model training in a docker container
+To run the model training script src/modeling/training.py in a reproducible docker container first build an image using the following command:
+```console
+docker build -f dockerfiles/training.dockerfile . -t training:<image_tag>
+```
+Then run the training script in a container using:
+```console
+docker run --name <container_name> --rm \
+    -v $(pwd)/data:/wd/data                             `# mount the data folder` \
+    -v $(pwd)/models:/wd/models                         `# mount the model folder` \
+    -v $(pwd)/hydra_logs/training_outputs:/wd/outputs   `# mount the hydra logging folder` \
+    training:<image_tag> \
+    paths.model_name=model0 \
+    paths.training_data=data/processed/pokemon.pth
+```
+
+### Workspace cleaning and garbage collection
+To remove a docker image run the following:
+```console
+docker rmi <image_name>:<image_tag>
+```
+To run docker garbage collection run the following:
+```console
+docker system prune -f
+```
+To delete all unused images (warning) and run docker garbage collection run the following:
+```console
+docker system prune -af
+```
+TODO: add a "make clean" command to the Makefile
+
 ### Dataset Structure
 Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
 
@@ -123,7 +154,11 @@ Some tests will be done in the coming weeks, right now what we need to change in
 │   ├── processed      <- The final, canonical data sets for modeling.
 │   └── raw            <- The original, immutable data dump.
 │
+├── dockerfiles        <- Dockerfiles for reproducible training and inference.
+│
 ├── docs               <- A default mkdocs project; see mkdocs.org for details
+│
+├── hydra_logs         <- Logging information on training and inference runs of models.
 │
 ├── models             <- Trained and serialized models, model predictions, or model summaries
 │
@@ -157,7 +192,7 @@ Some tests will be done in the coming weeks, right now what we need to change in
     ├── models         <- Scripts to train models and then use trained models to make
     │   │                 predictions
     │   ├── predict_model.py
-    │   └── train_model.py
+    │   └── training.py
     │
     └── visualization  <- Scripts to create exploratory and results oriented visualizations
         └── visualize.py
