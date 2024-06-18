@@ -6,6 +6,8 @@ tqdm
 click
 torch
 torchvision
+pytest
+hydra-core
 
 # Training Dependencies
 accelerate>=0.16.0
@@ -19,6 +21,5 @@ Jinja2
 # Inference Dependencies
 bitsandbytes
 xformers
-
-# Add hydra-core
-hydra-core
+diffusers
+datasets
