@@ -3,28 +3,26 @@ Implementation of the UNet model from paper: "Denoising Diffusion Probabilistic 
 """
 
 import math
-from typing import Optional, Tuple, Union, List
+from typing import List, Optional, Tuple, Union
 
 import torch
 from torch import nn
 
 
 class Swish(nn.Module):
-    """
-    Swish activation function
-    """
+    """Swish activation function."""
+
     def forward(self, x):
         return x * torch.sigmoid(x)
 
 
 class TimeEmbedding(nn.Module):
-    """
-    Time Embedding layer, this can be seen as a positional encoding layer.
+    """Time Embedding layer, this can be seen as a positional encoding layer.
+
     But instead of using sinusoidal positional encoding, we use a multi-layer perceptron (MLP) to generate embeddings.
     """
 
-    def __init__(self, 
-                 model_dim: int):
+    def __init__(self, model_dim: int):
         super().__init__()
         self.model_dim = model_dim
         self.fc1 = nn.Linear(self.model_dim // 4, self.model_dim)
@@ -32,9 +30,7 @@ class TimeEmbedding(nn.Module):
         self.activation = Swish()
 
     def forward(self, t: torch.Tensor):
-        """
-        This forward function will first implement the sinusoidal positional encoding and project it with an MLP
-        """
+        """This forward function will first implement the sinusoidal positional encoding and project it with an MLP."""
         half_dim = self.model_dim // 8
         emb = math.log(10_000) / (half_dim - 1)
         emb = torch.exp(torch.arange(half_dim, device=t.device) * -emb)
@@ -49,8 +45,8 @@ class TimeEmbedding(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    """
-    A residual block has two convolution layers with group normalization.
+    """A residual block has two convolution layers with group normalization.
+
     Each resolution is processed with two residual blocks.
     Args:
         in_channels: Number of input channels
@@ -60,23 +56,31 @@ class ResidualBlock(nn.Module):
         dropout: Dropout rate
     """
 
-    def __init__(self, 
-                 in_channels: int, 
-                 out_channels: int, 
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
                  time_channels: int,
-                 n_groups: int = 32, 
+                 n_groups: int = 32,
                  dropout: float = 0.1):
         super().__init__()
         self.norm1 = nn.GroupNorm(n_groups, in_channels)
         self.act1 = Swish()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.conv1 = nn.Conv2d(in_channels,
+                               out_channels,
+                               kernel_size=(3, 3),
+                               padding=(1, 1))
         self.norm2 = nn.GroupNorm(n_groups, out_channels)
         self.act2 = Swish()
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.conv2 = nn.Conv2d(out_channels,
+                               out_channels,
+                               kernel_size=(3, 3),
+                               padding=(1, 1))
 
         # Skip connection, similar to resnet
         if in_channels != out_channels:
-            self.skip = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 1))
+            self.skip = nn.Conv2d(in_channels,
+                                  out_channels,
+                                  kernel_size=(1, 1))
         else:
             self.skip = nn.Identity()
 
@@ -113,10 +117,11 @@ class AttentionBlock(nn.Module):
         d_k: Number of dimensions in the key and query vectors
         n_groups: Number of groups for group normalization
     """
-    def __init__(self, 
-                 n_channels: int, 
-                 n_heads: int = 8, 
-                 d_k: int = None, 
+
+    def __init__(self,
+                 n_channels: int,
+                 n_heads: int = 8,
+                 d_k: int = None,
                  n_groups: int = 32):
         super().__init__()
         if d_k is None:
@@ -128,7 +133,7 @@ class AttentionBlock(nn.Module):
         # Output linear layer
         self.output = nn.Linear(n_heads * d_k, n_channels)
         # Scale factor for dot-product attention
-        self.scale = d_k ** -0.5
+        self.scale = d_k**-0.5
         self.n_heads = n_heads
         self.d_k = d_k
 
@@ -164,10 +169,8 @@ class DownBlock(nn.Module):
         time_channels: Number of channels in the time step embeddings
         has_attn: Whether to use attention block, not every block has attention, check the paper for more details
     """
-    def __init__(self, 
-                 in_channels: int, 
-                 out_channels: int, 
-                 time_channels: int, 
+
+    def __init__(self, in_channels: int, out_channels: int, time_channels: int,
                  has_attn: bool):
         super().__init__()
         self.res = ResidualBlock(in_channels, out_channels, time_channels)
@@ -191,13 +194,12 @@ class UpBlock(nn.Module):
         time_channels: Number of channels in the time step embeddings
         has_attn: Whether to use attention block, not every block has attention, check the paper for more details
     """
-    def __init__(self, 
-                 in_channels: int, 
-                 out_channels: int, 
-                 time_channels: int, 
+
+    def __init__(self, in_channels: int, out_channels: int, time_channels: int,
                  has_attn: bool):
         super().__init__()
-        self.res = ResidualBlock(in_channels + out_channels, out_channels, time_channels)
+        self.res = ResidualBlock(in_channels + out_channels, out_channels,
+                                 time_channels)
         if has_attn:
             self.attn = AttentionBlock(out_channels)
         else:
@@ -217,9 +219,7 @@ class MiddleBlock(nn.Module):
         time_channels: Number of channels in the time step embeddings
     """
 
-    def __init__(self, 
-                 n_channels: int, 
-                 time_channels: int):
+    def __init__(self, n_channels: int, time_channels: int):
         super().__init__()
         self.res1 = ResidualBlock(n_channels, n_channels, time_channels)
         self.attn = AttentionBlock(n_channels)
@@ -239,9 +239,10 @@ class Upsample(nn.Module):
         n_channels: Number of input channels
     """
 
-    def __init__(self, n_channels):
+    def __init__(self, n_channels: int):
         super().__init__()
-        self.conv = nn.ConvTranspose2d(n_channels, n_channels, (4, 4), (2, 2), (1, 1))
+        self.conv = nn.ConvTranspose2d(n_channels, n_channels, (4, 4), (2, 2),
+                                       (1, 1))
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):
         return self.conv(x)
@@ -254,7 +255,7 @@ class Downsample(nn.Module):
         n_channels: Number of input channels
     """
 
-    def __init__(self, n_channels):
+    def __init__(self, n_channels: int):
         super().__init__()
         self.conv = nn.Conv2d(n_channels, n_channels, (3, 3), (2, 2), (1, 1))
 
@@ -276,20 +277,25 @@ class DiffusionUNet(nn.Module):
         n_blocks: Number of blocks at each resolution
     """
 
-    def __init__(self, 
-                 image_channels: int = 3, 
+    def __init__(self,
+                 image_channels: int = 3,
                  n_channels: int = 64,
-                 channel_multipliers: Union[Tuple[int, ...], List[int]] = (1, 2, 2, 4),
-                 is_attn: Union[Tuple[bool, ...], List[bool]] = (False, False, True, True),
+                 channel_multipliers: Union[Tuple[int, ...],
+                                            List[int]] = (1, 2, 2, 4),
+                 is_attn: Union[Tuple[bool, ...],
+                                List[bool]] = (False, False, True, True),
                  n_blocks: int = 2):
         super().__init__()
-        
+
         # Different feature map resolutions
         n_factor = len(channel_multipliers)
 
         # project the image into high dimensional feature map space
-        self.image_proj = nn.Conv2d(image_channels, n_channels, kernel_size=(3, 3), padding=(1, 1))
-        
+        self.image_proj = nn.Conv2d(image_channels,
+                                    n_channels,
+                                    kernel_size=(3, 3),
+                                    padding=(1, 1))
+
         # time embedding, the only main difference between an attention model and the DDPM model
         self.time_emb = TimeEmbedding(n_channels * 4)
 
@@ -301,17 +307,22 @@ class DiffusionUNet(nn.Module):
         for i in range(n_factor):
             out_channels = in_channels * channel_multipliers[i]
             for _ in range(n_blocks):
-                down.append(DownBlock(in_channels, out_channels, n_channels * 4, is_attn[i]))
+                down.append(
+                    DownBlock(in_channels, out_channels, n_channels * 4,
+                              is_attn[i]))
                 in_channels = out_channels
             # the last block will not downsample the image
             if i < n_factor - 1:
                 down.append(Downsample(in_channels))
-        
+
         # The Downsample blocks are created on the fly
         self.down = nn.ModuleList(down)
-         
-        # Bottleneck Blocks 
-        self.middle = MiddleBlock(out_channels, n_channels * 4, )
+
+        # Bottleneck Blocks
+        self.middle = MiddleBlock(
+            out_channels,
+            n_channels * 4,
+        )
 
         # Upsampling Blocks
         up = []
@@ -321,9 +332,12 @@ class DiffusionUNet(nn.Module):
         for i in reversed(range(n_factor)):
             out_channels = in_channels
             for _ in range(n_blocks):
-                up.append(UpBlock(in_channels, out_channels, n_channels * 4, is_attn[i]))
+                up.append(
+                    UpBlock(in_channels, out_channels, n_channels * 4,
+                            is_attn[i]))
             out_channels = in_channels // channel_multipliers[i]
-            up.append(UpBlock(in_channels, out_channels, n_channels * 4, is_attn[i]))
+            up.append(
+                UpBlock(in_channels, out_channels, n_channels * 4, is_attn[i]))
             in_channels = out_channels
             # the last block will not upsample the image
             if i > 0:
@@ -334,7 +348,10 @@ class DiffusionUNet(nn.Module):
 
         self.norm = nn.GroupNorm(8, n_channels)
         self.act = Swish()
-        self.final = nn.Conv2d(in_channels, image_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.final = nn.Conv2d(in_channels,
+                               image_channels,
+                               kernel_size=(3, 3),
+                               padding=(1, 1))
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):
         t = self.time_emb(t)
@@ -357,13 +374,3 @@ class DiffusionUNet(nn.Module):
 
         result = self.final(self.act(self.norm(x)))
         return result
-    
-
-if __name__ == "__main__":
-    # Test the UNet model
-    model = DiffusionUNet()
-    x = torch.randn(1, 3, 64, 64)
-    t = torch.randn(1, 1)
-    with torch.no_grad():
-        out = model(x, t)
-        print(out.shape)

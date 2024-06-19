@@ -1,25 +1,26 @@
-Kaggle==1.6.14
-dvc==3.50.1
-dvc[gs]
-wandb
-tqdm
-click
-torch
-torchvision
-pytest
-hydra-core
 
 # Training Dependencies
 accelerate>=0.16.0
-torchvision
-transformers>=4.25.1
-datasets
-ftfy
-tensorboard
-Jinja2
 
 # Inference Dependencies
 bitsandbytes
-xformers
-diffusers
+click
 datasets
+datasets
+diffusers
+dvc==3.50.1
+dvc[gs]
+ftfy
+hydra-core
+Jinja2
+Kaggle==1.6.14
+pre-commit
+pytest
+tensorboard
+torch
+torchvision
+torchvision
+tqdm
+transformers>=4.25.1
+wandb
+xformers
