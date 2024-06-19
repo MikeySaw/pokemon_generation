@@ -1,8 +1,4 @@
-
-# Training Dependencies
 accelerate>=0.16.0
-
-# Inference Dependencies
 bitsandbytes
 click
 datasets
@@ -14,8 +10,10 @@ ftfy
 hydra-core
 Jinja2
 Kaggle==1.6.14
+numpy<2
 pre-commit
 pytest
+pytorch_lightning
 tensorboard
 torch
 torchvision
