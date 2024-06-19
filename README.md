@@ -8,8 +8,19 @@
 
 In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt.
 
+<a name="top"></a>
+## In Construction... 🚧🚧🚧
+__TL;DR__: please put the things you are doing but havn't finished yet here, so there will be no efforts wasted on repeated stuff. \
+For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. You are add the things you wanna do but havn't/you think deserve to be done their.
+- [ ] Working on train.py and more `pytest` files 👨‍💻 
+- [ ] Working on github action files 👨‍💻
+- [ ] Working on `FastAPI` now 👨‍💻 
+- [ ] Working on _Distributed Training file_ now 👨‍💻
+- [ ] Working on Cloud deployment now 👨‍💻
+- [ ] Working Profiling and corresponding acceleration methods now 👨‍💻
+
 ## Experiment Command Lines Guidance(Experiments Version)
-### Data Download Part
+### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
 run the following commands in command line to download zipped images from kaggle website and unzip them:
@@ -17,7 +28,7 @@ run the following commands in command line to download zipped images from kaggle
 chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
-### Data Version Control Test
+### Data Version Control Test <a href="#top">[Back to Top]</a>
 run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 ```shell
 # Ignore the first line if you have not installed dvc yet
@@ -29,7 +40,7 @@ pip install dvc-gs
 dvc pull
 ```
 
-### Hydra Test
+### Hydra Test <a href="#top">[Back to Top]</a>
 please check the `src/config` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 ```shell
 # @package _global_
@@ -48,7 +59,20 @@ The structure of this folder should always looks similar to this one:
     └── train_2.yaml
 ```
 
-### Dockerfile Test
+### Pytest Test <a href="#top">[Back to Top]</a>
+To run `.py` files related to the  `pytest` package, simply run the following command:
+```shell
+pytest tests/
+```
+this will run all the files inside the `tests` folder named as `tests_ ...`
+
+Wanna add your own `pytest` check into the repo? Easy! Simply add a `.py` file inside the `tests` folder, the file should be named as `test_...`, then add libraries and functions inside this file, the function should also be written like:
+```shell
+def test_...(*args, **kwargs):
+    ...
+```
+
+### Dockerfile Test <a href="#top">[Back to Top]</a>
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile. 
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
 to build and test this toy example dockerfile, simply run the following command:
@@ -102,13 +126,13 @@ accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.p
 ```
 Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them. 
 
-### Run model training in a docker container
+### Run model training in a docker container <a href="#top">[Back to Top]</a>
 To run the model training script src/modeling/training.py in a reproducible docker container first build an image using the following command:
-```console
+```shell
 docker build -f dockerfiles/training.dockerfile . -t training:<image_tag>
 ```
 Then run the training script in a container using:
-```console
+```shell
 docker run --name <container_name> --rm \
     -v $(pwd)/data:/wd/data                             `# mount the data folder` \
     -v $(pwd)/models:/wd/models                         `# mount the model folder` \
@@ -118,85 +142,26 @@ docker run --name <container_name> --rm \
     paths.training_data=data/processed/pokemon.pth
 ```
 
-### Workspace cleaning and garbage collection
+### Workspace cleaning and garbage collection <a href="#top">[Back to Top]</a>
 To remove a docker image run the following:
-```console
+```shell
 docker rmi <image_name>:<image_tag>
 ```
 To run docker garbage collection run the following:
-```console
+```shell
 docker system prune -f
 ```
 To delete all unused images (warning) and run docker garbage collection run the following:
-```console
+```shell
 docker system prune -af
 ```
 TODO: add a "make clean" command to the Makefile
 
-### Dataset Structure
+### Dataset Structure <a href="#top">[Back to Top]</a>
 Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
 
-## To Do/Try to do
+## To Do/Try to do 
 Some tests will be done in the coming weeks, right now what we need to change inside the things we already have done would be:
 - [ ] Check/Fix the paths inside different test files.
 - [ ] Get a more easier to test model to replace the one inside the `, the SD model right now requires huge GPU RAM to test
 - [ ] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters, 
-
-## Project Organization
-
-```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── dockerfiles        <- Dockerfiles for reproducible training and inference.
-│
-├── docs               <- A default mkdocs project; see mkdocs.org for details
-│
-├── hydra_logs         <- Logging information on training and inference runs of models.
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for src
-│                         and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── src                <- Source code for use in this project.
-    │
-    ├── __init__.py    <- Makes src a Python module
-    │
-    ├── data           <- Scripts to download or generate data
-    │   └── make_dataset.py
-    │
-    ├── features       <- Scripts to turn raw data into features for modeling
-    │   └── build_features.py
-    │
-    ├── models         <- Scripts to train models and then use trained models to make
-    │   │                 predictions
-    │   ├── predict_model.py
-    │   └── training.py
-    │
-    └── visualization  <- Scripts to create exploratory and results oriented visualizations
-        └── visualize.py
-```
-
---------
-
