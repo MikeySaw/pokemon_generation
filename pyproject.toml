@@ -1,13 +1,16 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "src"
+name = "pokemon_generation"
 version = "0.0.1"
-description = "This is a description."
+description = "In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt."
 authors = [
-  { name = "Author Names" },
+  {name = "Meimingwei Li", email = "yecanlee@yahoo.com"},
+  {name = "Gamze G. Kasman", email = "g.kasman@campus.lmu.de"},
+  {name = "Michael Sawitzki", email = "M.Sawitzki99@gmail.com"},
+  {name = "Luis Karrlein", email = "Luis.Karrlein@campus.lmu.de"},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
@@ -16,16 +19,20 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 requires-python = "~=3.11"
+dynamic = ["dependencies"]
 
-[tool.black]
-line-length = 99
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.venv
-)/
-'''
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+line-length = 120
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
 
 [tool.ruff.lint.isort]
 known_first_party = ["src"]
