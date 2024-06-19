@@ -12,12 +12,17 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 ## In Construction... 🚧🚧🚧
 __TL;DR__: please put the things you are doing but havn't finished yet here, so there will be no efforts wasted on repeated stuff. \
 For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. You can add the things you wanna do but havn't/you think deserve to be done there.
-- [ ] Working on train.py and more `pytest` files 👨‍💻 
-- [ ] Working on github action files 👨‍💻
-- [ ] Working on `FastAPI` now 👨‍💻 
+- [ ] Working on train.py and more `pytest` files 👨‍💻
+- [x] Working on github action files 👨‍💻, two added, three more need to be added 
+- [ ] Working on `FastAPI` now 👨‍💻
 - [ ] Working on _Distributed Training file_ now 👨‍💻
 - [ ] Working on Cloud deployment now 👨‍💻
 - [ ] Working Profiling and corresponding acceleration methods now 👨‍💻
+
+<a name="top"></a>
+## Crazy Ideas 🔥🔥🔥
+__TL;DR__: put the things you felt like are more detailed than a general _To Do_ but havn't started yet here: \
+- [ ] Create a slower version of inference deliberately, play with the `profiler` than make it faster later 💃💃💃, also play with slower/memory bad behavior first (use `.to(device) instead of (device=device), etc.)
 
 ## Experiment Command Lines Guidance(Experiments Version)
 ### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
@@ -44,13 +49,13 @@ dvc pull
 please check the `src/config` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 ```shell
 # @package _global_
-``` 
-at the beginning of your yaml files so that later we can directly change the config files we gonna use from command line like this way: 
+```
+at the beginning of your yaml files so that later we can directly change the config files we gonna use from command line like this way:
 ```shell
 # change the default hyperparameter values tom values inside the train_1.yaml file
 python train.py config=train_1.yaml
 ```
-The structure of this folder should always looks similar to this one: 
+The structure of this folder should always looks similar to this one:
 ```shell
 ├── config
 ├── default_config.yaml
@@ -73,7 +78,7 @@ def test_...(*args, **kwargs):
 ```
 
 ### Dockerfile Test <a href="#top">[Back to Top]</a>
-please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile. 
+please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile.
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
 to build and test this toy example dockerfile, simply run the following command:
 ```shell
@@ -124,7 +129,7 @@ accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.p
 --multi_gpu 2 \
 --seed=42
 ```
-Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them. 
+Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them.
 
 ### Run model training in a docker container <a href="#top">[Back to Top]</a>
 To run the model training script src/modeling/training.py in a reproducible docker container first build an image using the following command:
@@ -160,8 +165,8 @@ TODO: add a "make clean" command to the Makefile
 ### Dataset Structure <a href="#top">[Back to Top]</a>
 Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
 
-## To Do/Try to do 
+## To Do/Try to do
 Some tests will be done in the coming weeks, right now what we need to change inside the things we already have done would be:
 - [ ] Check/Fix the paths inside different test files.
 - [ ] Get a more easier to test model to replace the one inside the `, the SD model right now requires huge GPU RAM to test
-- [ ] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters, 
+- [ ] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters,
