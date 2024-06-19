@@ -11,7 +11,7 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 <a name="top"></a>
 ## In Construction... 🚧🚧🚧
 __TL;DR__: please put the things you are doing but havn't finished yet here, so there will be no efforts wasted on repeated stuff. \
-For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. You are add the things you wanna do but havn't/you think deserve to be done their.
+For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. You can add the things you wanna do but havn't/you think deserve to be done there.
 - [ ] Working on train.py and more `pytest` files 👨‍💻 
 - [ ] Working on github action files 👨‍💻
 - [ ] Working on `FastAPI` now 👨‍💻 
