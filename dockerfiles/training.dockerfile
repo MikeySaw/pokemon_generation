@@ -1,6 +1,6 @@
 # load base image
-FROM python:3.11-slim
-    # eventually replace by:    FROM nvcr.io/nvidia/pytorch:24.01-py3
+FROM nvcr.io/nvidia/pytorch:24.01-py3
+# without GPU: FROM python:3.11-slim
 
 # create working directory
 RUN mkdir wd
@@ -19,9 +19,8 @@ COPY src/ src/
 RUN sed -ni '/readme/!p' pyproject.toml
 
 # install dependencies
-RUN pip install hydra-core
-    # eventually replace by:    RUN pip install -r requirements.txt --no-cache-dir
-    # or by:                    RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
+RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
+# alternative to: RUN pip install -r requirements.txt --no-cache-dir
 
 # install the package
 RUN pip install . --no-deps --no-cache-dir

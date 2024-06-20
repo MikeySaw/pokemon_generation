@@ -1,0 +1,8 @@
+n_epochs: 10
+batch_size: 16
+num_workers: 4
+optimizer: AdamW
+optimizer_params: {}
+criterion: CrossEntropyLoss
+criterion_params: {}
+logging_freq: 100

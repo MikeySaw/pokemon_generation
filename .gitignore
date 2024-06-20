@@ -173,6 +173,14 @@ cython_debug/
 .kaggle
 /data
 
-#hydra
+#hydra logs
 hydra_logs/training_outputs/*
 !hydra_logs/training_outputs/.gitkeep
+
+# wandb logs
+wandb/*
+!wandb/.gitkeep
+
+# lightning logs
+lightning_logs/*
+!lightning_logs/.gitkeep
