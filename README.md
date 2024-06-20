@@ -25,6 +25,27 @@ __TL;DR__: put the things you felt like are more detailed than a general _To Do_
 - [ ] Create a slower version of inference deliberately, play with the `profiler` than make it faster later 💃💃💃, also play with slower/memory bad behavior first (use `.to(device) instead of (device=device), etc.)
 
 ## Experiment Command Lines Guidance(Experiments Version)
+### Starting Point Alarm! 🚨🚨🚨 <a href="#top">[Back to Top]</a>
+Before start to `git add` anything related to this repo, please make sure you run the following commands! 😱😱😱
+```shell
+# Get the newest version of the repo！😱
+git pull origin main
+
+# install the newest version dependencies!😱
+pip install -r requirements.txt
+
+# run the pre-commit hook to check/modify your file you wanna push!😱 
+pip install pre-commit 
+
+# Alert!!!💥💥💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
+pre-commit run --all-files
+
+# Only want to check one file? 😱 Use this command instead!
+pre-commit run --files YOUR_FILE_NAME
+
+# Then do the normal procedure 💯💯💯
+# git add / git commit / git push ...
+```
 ### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
@@ -46,7 +67,7 @@ dvc pull
 ```
 
 ### Hydra Test <a href="#top">[Back to Top]</a>
-please check the `src/config` folder for different hyperparameter settings, right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
+please check the `src/config` folder for different hyperparameter settings, ~~right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet,~~ We started to add the real hyperparameters into the repo, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 ```shell
 # @package _global_
 ```
@@ -63,6 +84,16 @@ The structure of this folder should always looks similar to this one:
     ├── train_1.yaml
     └── train_2.yaml
 ```
+__Update__: We are adding more files into the `config` folder, this means that we are having more folders inside the `config` folder now compared to before, this would be nice for us since we can change the config settings during the _training/sampling_ in command line, it would be something like:
+```shell
+python train.py optimizer=sgd
+```
+### Github Actions <a href="#top">[Back to Top]</a>
+For github actions related file, please check the `.github/workflows`, this folder includes all the github actions which will be trigged when we push/pull into our repo, to be more specific about those files, here is a brief introduction about what those files are doing: \
+the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
+the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo. 
+#### Pre-Commit Hook
+To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
 ### Pytest Test <a href="#top">[Back to Top]</a>
 To run `.py` files related to the  `pytest` package, simply run the following command:
