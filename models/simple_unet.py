@@ -35,7 +35,7 @@ class TimeEmbedding(nn.Module):
         emb = math.log(10_000) / (half_dim - 1)
         emb = torch.exp(torch.arange(half_dim, device=t.device) * -emb)
         emb = t[:, None] * emb[None, :]
-        emb = torch.cat((emb.sin(), emb.cos()), dim=2)
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
 
         # Project it into a different dimension by using the MLP
         emb = self.activation(self.fc1(emb))
