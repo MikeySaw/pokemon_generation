@@ -199,6 +199,16 @@ accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.p
 
 Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them.
 
+### Run model training locally <a href="#top">[Back to Top]</a>
+
+To run training locally use:
+
+```shell
+python -u src/modeling/training.py hydra.job.chdir=False
+```
+
+Specifying "hydra.job.chdir=False" is necessary because hydra changes the working directory by default (this is something we do not want).
+
 ### Run model training in a docker container <a href="#top">[Back to Top]</a>
 
 To run the model training script src/modeling/training.py in a reproducible docker container first build an image using the following command:
@@ -222,6 +232,8 @@ docker run --gpus all --rm \
     paths.model_name=model0 \
     paths.training_data=data/processed/pokemon.pth
 ```
+
+(The option "hydra.job.chdir=False" is already specified in the image and need not be explicitly added.)
 
 ### Workspace cleaning and garbage collection <a href="#top">[Back to Top]</a>
 

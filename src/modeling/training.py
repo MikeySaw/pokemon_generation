@@ -7,7 +7,6 @@ from pytorch_lightning.loggers import WandbLogger
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
-import wandb
 
 # Importing the used dataset subclass is needed to reconstruct the dataset
 from src.data.make_dataset import PokemonDataset  # noqa
@@ -15,6 +14,7 @@ from src.data.make_dataset import PokemonDataset  # noqa
 # Import UNet and the diffusion sampling process
 from src.models.simple_ddpm import DenoiseDiffusion  # noqa
 from src.models.simple_unet import DiffusionUNet  # noqa
+import wandb
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +70,10 @@ def main(cfg):
         log_every_n_steps=cfg.training_params.logging_freq,
         logger=wandb_logger,
         profiler="simple",
+        accelerator=cfg.training_params.accelerator,
+        devices=cfg.training_params.devices,
+        strategy=cfg.training_params.strategy,
+        num_nodes=cfg.training_params.num_nodes,
     )
     trainer.fit(model, train_dataloader)
 
