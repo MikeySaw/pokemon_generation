@@ -6,3 +6,7 @@ optimizer_params: {}
 criterion: CrossEntropyLoss
 criterion_params: {}
 logging_freq: 100
+accelerator: "gpu"
+devices: 8
+strategy: ddp
+num_nodes: 1
