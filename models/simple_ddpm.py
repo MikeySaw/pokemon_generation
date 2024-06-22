@@ -94,7 +94,7 @@ class DenoiseDiffusion:
         # calculate the mean
         mean = 1 / (alpha**0.5) * (xt - eps_coef * eps_theta)
         # calculate the variance
-        var = gather(self.sigma2, t)
+        var = gather(self.sigma_sqaure, t)
 
         # initialize a random noise for the sampling
         eps = torch.randn(xt.shape, device=xt.device)

@@ -22,7 +22,7 @@ training:
   batch_size: 64
   n_samples: 16
   learning_rate: 2e-5
-  epochs: 1000
+  epochs: 100
 
 optimizer:
   type: adam
