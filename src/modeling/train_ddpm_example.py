@@ -27,31 +27,14 @@ sys.path.append(project_root)
 from typing import List  # noqa
 
 # Import UNet and the diffusion sampling process
-import models.simple_ddpm as diffusion  # noqa
 from models.simple_ddpm import DenoiseDiffusion as ddf
 from models.simple_unet import DiffusionUNet  # noqa
 
-# Load the config file by using the OmegaConf library
-"""
-config = OmegaConf.load('../../conf/config.yaml')
-
-eps_pred_model = DiffusionUNet(image_channels=3, n_channels=64)
-print(eps_pred_model)
-
-# Create all the things needed for training
-train_data_loader = torch.utils.data.DataLoader(config.dataset,
-                                                config.batch_size,
-                                                shuffle=True,
-                                                pin_memory=True)
-optimizer = torch.optim.Adam(eps_pred_model.parameters(),
-                             lr=config.training.learning_rate)
-
-# Initialize the wandb
-wandb.init(project='diffusion', entity='yecanlee', config=config)
-"""
+# Add torch debug support
+torch.autograd.set_detect_anomaly(True)
 
 # Define the sampling function
-def sample(config: OmegaConf, ddpm: ddf):
+def sample(config: OmegaConf, ddpm: torch.nn.Module):
     with torch.no_grad():
         x = torch.randn([
             config.training.n_samples, config.model.image_channels,
@@ -71,7 +54,7 @@ def sample(config: OmegaConf, ddpm: ddf):
 
 
 # Define the training function
-def train(config: OmegaConf, ddpm: ddf, optimizer: torch.optim.Optimizer, train_data_loader: torch.utils.data.DataLoader):
+def train(config: OmegaConf, ddpm: torch.nn.Module, optimizer: torch.optim.Optimizer, train_data_loader: torch.utils.data.DataLoader):
     total_loss = 0
     for images, _ in train_data_loader:
         images = images.to(config.device)
@@ -155,6 +138,10 @@ def main():
 
     # Initialize the model and optimizer
     eps_pred_model = DiffusionUNet(image_channels=3, n_channels=config.model.n_channels).to(config.device)
+
+    # Load the pre-trained model if the path exists
+    # if os.path.exists('eps_pred_model.pth'):
+    #     eps_pred_model.load_state_dict(torch.load('eps_pred_model.pth'))
     optimizer = torch.optim.Adam(eps_pred_model.parameters(), lr=config.training.learning_rate)
 
     # Initialize wandb
