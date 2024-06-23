@@ -18,7 +18,7 @@ For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. Y
 - [ ] Working on train.py and more `pytest` files 👨‍💻
 - [x] Working on github action files 👨‍💻, two added, three more need to be added
 - [ ] Working on `FastAPI` now 👨‍💻
-- [ ] Working on _Distributed Training file_ now 👨‍💻
+- [x] Working on _Distributed Training file_ now 👨‍💻
 - [ ] Working on Cloud deployment now 👨‍💻
 - [ ] Working Profiling and corresponding acceleration methods now 👨‍💻
 
@@ -29,6 +29,8 @@ For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. Y
 __TL;DR__: put the things you felt like are more detailed than a general _To Do_ but havn't started yet here: \
 
 - [ ] Create a slower version of inference deliberately, play with the `profiler` than make it faster later 💃💃💃, also play with slower/memory bad behavior first (use `.to(device) instead of (device=device), etc.)
+- [ ] Create a `Model Zoo` section like the `latent diffusion` repo and put the pretrained weights into this section, we can either put the pretrained weights into a `Google Drive` folder or just use `dvc` to pull the weights and write down the command to `cd` to the path of the pretrained weights. 
+
 
 ## Experiment Command Lines Guidance(Experiments Version)
 
@@ -55,6 +57,16 @@ pre-commit run --files YOUR_FILE_NAME
 # Then do the normal procedure 💯💯💯
 # git add / git commit / git push ...
 ```
+
+### Train a diffusion model from scratch
+__This section is still under heavy construction work__, please come back very often to check the newest progress about our project 🤩🤩🤩
+To train a diffusion model from scratch, simply run the following commands:
+```
+cd src/modeling/
+python train_ddpm_example.py
+```
+__Alert!!!__🚨🚨🚨 You must have a very nice GPU if you want to run the training commands!
+
 
 ### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
 
