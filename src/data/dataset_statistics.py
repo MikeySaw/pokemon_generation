@@ -22,9 +22,9 @@ def show_batch(dataloader):
     
     for i in range(batch_size):
         imshow(images[i], axs[i], captions[i])
-    
-    plt.show()
     plt.savefig("reports/figures/pokemon_images.png")
+    plt.show()
+    
 
 
 def dataset_statistics():
