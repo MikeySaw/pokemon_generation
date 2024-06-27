@@ -27,11 +27,7 @@ jobs:
 
     - name: Get data
       run: |
-        pip install dvc
-        pip install dvc-gdrive
-        dvc pull --no-run-cache
-      env:
-        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }} 
+        dvc pull 
 
     - name: Check data statistics & generate report
       run: |
