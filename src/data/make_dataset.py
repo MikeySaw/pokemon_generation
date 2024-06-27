@@ -1,5 +1,6 @@
 import os
 import hydra 
+import json
 from omegaconf import OmegaConf
 from loguru import logger
 
@@ -10,47 +11,45 @@ from torchvision import transforms
 
 
 class PokemonDataset(Dataset):
-    def __init__(self, image_folder, transform=None):
+    def __init__(self, data, image_folder, transform=None):
+        self.data = data
         self.image_folder = image_folder
         self.transform = transform 
-        self.image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-
+        
     def __len__(self):
-        return len(self.image_files)
+        return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join(self.image_folder, self.image_files[idx])
+        img_name = os.path.join(self.image_folder, self.data[idx]['image'])
         image = Image.open(img_name).convert('RGB')
+        caption = self.data[idx]['caption']
 
         if self.transform:
             image = self.transform(image)
 
-        return image 
+        return image, caption
 
-
-@hydra.main(config_path='../config', config_name='default_config.yaml')
-def main(config):
-    logger.info(f"configuration: \n {OmegaConf.to_yaml(config)}")
+def main():
     logger.info(f"Loading images...")
-
-    data_params = config.dataset
     
     transform = transforms.Compose([
-        transforms.Resize(data_params['image_size']),
+        transforms.Resize((128,128)),
         transforms.ToTensor()
     ])
-
-    print(data_params['image_size'])
-    # that line is here because hydra changes the current workind directory
-    os.chdir('../../..')
-    # check if processed datafolder exists, otherwise create it
-    if not os.path.exists(data_params['processed_path']):
-        os.makedirs(data_params['processed_path'])
-
-    dataset = PokemonDataset(image_folder=data_params['image_path'], transform=transform)
-    torch.save(dataset, os.path.join(data_params['processed_path'], 'pokemon.pth'))
     
-    logger.info(f"Created dataset and saved at {os.path.join(data_params['processed_path'], 'pokemon.pth')}")
+    # check if processed datafolder exists, otherwise create it
+    if not os.path.exists("data/processed"):
+        os.makedirs("data/processed")
+
+    file_path = "data/processed/pokemon_data.json"
+
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+
+    dataset = PokemonDataset(data=data, image_folder="data/raw", transform=transform)
+    torch.save(dataset, os.path.join("data/processed", 'pokemon.pth'))
+    
+    logger.info(f"Created dataset and saved at {os.path.join("data/processed", 'pokemon.pth')}")
 
     
 if __name__ == "__main__": 
