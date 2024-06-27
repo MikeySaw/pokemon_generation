@@ -1,0 +1,50 @@
+name: DVC Workflow
+
+on:
+  pull_request:
+    branches:
+    - main
+    paths:
+    - '**/*.dvc'
+    - '.dvc/**'
+
+jobs:
+  run_data_checker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python 
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Get data
+      run: |
+        pip install dvc
+        pip install dvc-gdrive
+        dvc pull --no-run-cache
+      env:
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }} 
+
+    - name: Check data statistics & generate report
+      run: |
+        python src/data/dataset_statistics.py > data_statistics.md
+        echo '![](reports/figures/mnist_images.png "MNIST images")' >> data_statistics.md
+        echo '![](reports/figures/train_label_distribution.png "Train label distribution")' >> data_statistics.md
+        echo '![](reports/figures/test_label_distribution.png "Test label distribution")' >> data_statistics.md
+
+    - name: Setup cml 
+      uses: iterative/setup-cml@v2
+
+    - name: Comment on PR
+      env:
+        REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cml comment create data_statistics.md --watermark-title="Data Checker"

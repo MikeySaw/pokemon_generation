@@ -5,6 +5,8 @@ from tqdm import tqdm
 from PIL import Image
 from transformers import AutoProcessor, Blip2ForConditionalGeneration
 
+print(torch.cuda.is_available())
+
 # Set paths
 image_folder = "data/raw"
 output_json = "data/processed/pokemon_data.json"
@@ -29,12 +31,12 @@ for filename in tqdm(os.listdir(image_folder)):
     image = Image.open(image_path)
 
     # Generate a caption for the image
-    inputs = processor(images=image, return_tensors="pt")
+    inputs = processor(images=image, return_tensors="pt").to(device)
     generated_ids = model.generate(**inputs)
     caption = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
     # Add the image path and caption to the data list
-    data.append({"image_path": image_path, "caption": caption})
+    data.append({"image": filename, "caption": caption})
 
 # Save the data to a JSON file
 with open(output_json, "w") as f:
