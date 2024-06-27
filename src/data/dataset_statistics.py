@@ -1,28 +1,37 @@
 import matplotlib.pyplot as plt
 import torch
-from torchvision import transforms
+import numpy as np
+from torch.utils.data import DataLoader
 from make_dataset import PokemonDataset
-from mpl_toolkits.axes_grid1 import ImageGrid
 
-def show_image_and_caption(images: torch.Tensor, caption: str) -> None:
-    """Plot images and their captions in a grid."""
-    row_col = int(len(images) ** 0.5)
-    fig = plt.figure(figsize=(10.0, 10.0))
-    grid = ImageGrid(fig, 111, nrows_ncols=(row_col, row_col), axes_pad=0.3)
-    for ax, im, cap in zip(grid, images, caption):
-        ax.imshow(im.squeeze(), cmap="gray")
-        ax.set_title(f"Caption: {cap}")
-        ax.axis("off")
+def imshow(img, ax, caption):
+    img = img / 2 + 0.5  # unnormalize
+    npimg = img.numpy()
+    ax.imshow(np.transpose(npimg, (1, 2, 0)))
+    ax.set_title(caption, fontsize=8)
+    ax.axis('off')
+
+def show_batch(dataloader):
+    batch = next(iter(dataloader))
+    images, captions = batch
+    batch_size = len(images)
+    
+    fig, axs = plt.subplots(1, batch_size, figsize=(15, 5))
+    if batch_size == 1:
+        axs = [axs]
+    
+    for i in range(batch_size):
+        imshow(images[i], axs[i], captions[i])
+    
     plt.show()
-
+    plt.savefig("reports/figures/pokemon_images.png")
 
 
 def dataset_statistics():
-    transform = transforms.Compose(
-        [transforms.Resize((128, 128)),
-         transforms.ToTensor()])
-    data = PokemonDataset(image_folder="data/raw",
-                          transform=transform)
+    dataset = torch.load("data/processed/pokemon.pth")
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    show_batch(dataloader)
+
     
 
 if __name__ == "__main__":

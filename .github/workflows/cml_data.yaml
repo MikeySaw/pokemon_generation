@@ -36,9 +36,7 @@ jobs:
     - name: Check data statistics & generate report
       run: |
         python src/data/dataset_statistics.py > data_statistics.md
-        echo '![](reports/figures/mnist_images.png "MNIST images")' >> data_statistics.md
-        echo '![](reports/figures/train_label_distribution.png "Train label distribution")' >> data_statistics.md
-        echo '![](reports/figures/test_label_distribution.png "Test label distribution")' >> data_statistics.md
+        echo '![](reports/figures/pokemon_images.png "Pokemon images")' >> data_statistics.md
 
     - name: Setup cml 
       uses: iterative/setup-cml@v2
