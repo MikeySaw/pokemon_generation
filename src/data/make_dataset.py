@@ -1,5 +1,4 @@
 import os
-import hydra 
 import json
 from omegaconf import OmegaConf
 from loguru import logger
@@ -49,7 +48,7 @@ def main():
     dataset = PokemonDataset(data=data, image_folder="data/raw", transform=transform)
     torch.save(dataset, os.path.join("data/processed", 'pokemon.pth'))
     
-    logger.info(f"Created dataset and saved at {os.path.join("data/processed", 'pokemon.pth')}")
+    logger.info(f"Created dataset and saved at {os.path.join('data/processed', 'pokemon.pth')}")
 
     
 if __name__ == "__main__": 
