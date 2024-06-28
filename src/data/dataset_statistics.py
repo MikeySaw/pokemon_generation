@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 from make_dataset import PokemonDataset
 
 def imshow(img, ax, caption):
-    img = img / 2 + 0.5  # unnormalize
     npimg = img.numpy()
     ax.imshow(np.transpose(npimg, (1, 2, 0)))
     ax.set_title(caption, fontsize=8)
@@ -25,14 +24,11 @@ def show_batch(dataloader):
     plt.savefig("reports/figures/pokemon_images.png")
     plt.show()
     
-
-
 def dataset_statistics():
     dataset = torch.load("data/processed/pokemon.pth")
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
     show_batch(dataloader)
 
     
-
 if __name__ == "__main__":
     dataset_statistics()
