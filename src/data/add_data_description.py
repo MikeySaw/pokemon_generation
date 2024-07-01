@@ -11,7 +11,7 @@ def extract_numeric_value(dictionary):
     match = re.search(r'\d+', dictionary['image'])
     return int(match.group()) if match else 0
 
-def add_data_description(image_folder, output_jsonl, processor, model, test=False):
+def add_data_description(image_folder, output_json, processor, model, test=False):
 
     # Set the model to evaluation mode
     model.eval()
@@ -44,16 +44,14 @@ def add_data_description(image_folder, output_jsonl, processor, model, test=Fals
     sorted_data = sorted(data, key=extract_numeric_value)
 
     # Save the data to a JSON file
-    with open(output_jsonl, "w") as f:
-        for entry in sorted_data:
-            json.dump(entry, f)
-            f.write('\n')
+    with open(output_json, "w") as f:
+        json.dump(sorted_data, output_json)    
 
-    print(f"Data saved to {output_jsonl}")
+    print(f"Data saved to {output_json}")
 
 if __name__ == "__main__":
     image_folder = "data/raw"
-    output_jsonl = "data/raw/pokemon_data.jsonl"
+    output_json = "data/pokemon_data.json"
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -62,4 +60,4 @@ if __name__ == "__main__":
     model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b", torch_dtype=torch.float16)
     model.to(device)
 
-    add_data_description(image_folder=image_folder, output_json=output_jsonl, processor=processor, model=model)
+    add_data_description(image_folder=image_folder, output_json=output_json, processor=processor, model=model)
