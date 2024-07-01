@@ -3,7 +3,6 @@ import argparse
 import json
 import random
 from datasets import load_dataset
-from omegaconf import OmegaConf
 from loguru import logger
 
 from PIL import Image
@@ -17,32 +16,9 @@ class PokemonDataset(Dataset):
             self, 
             data, 
             image_folder: str, 
-            split: str = 'train', 
-            split_ratios: tuple = (0.8, 0.1, 0.1), 
             transform=None
     ):
-        random.seed(123)
-        n = len(data)
         self.data = data
-        random.shuffle(data)
-
-        train_ratio, val_ratio, test_ratio = split_ratios
-
-        if train_ratio + val_ratio + test_ratio != 1:
-            raise ValueError("train_ratio + val_ratio + test_ratio must be 1")
-        
-        train_end = int(train_ratio * n)
-        val_end = train_end + int(val_ratio * n)
-
-        if split == 'train':
-            self.data = self.data[:train_end]
-        elif split == 'val':
-            self.data = self.data[train_end:val_end]
-        elif split == 'test':
-            self.data = self.data[val_end:]
-        else:
-            raise ValueError("split must be 'train', 'val', or 'test'")
-        
         self.image_folder = image_folder
         self.transform = transform 
 
@@ -65,39 +41,51 @@ def pokemon_huggingface():
     dataset = load_dataset("imagefolder", data_dir="data/interim")
     return dataset
 
-def main(framework: str):
+def main():
     logger.info(f"Loading images...")
     
-    if framework == torch:
-        transform = transforms.Compose([
-            transforms.Resize((128,128)),
-            transforms.ToTensor()
-        ])
-        
-        # check if processed datafolder exists, otherwise create it
-        if not os.path.exists("data/processed"):
-            os.makedirs("data/processed")
-
-        file_path = "data/interim/pokemon_data.json"
-
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-
-        dataset = PokemonDataset(data=data, image_folder="data/raw", transform=transform)
-        torch.save(dataset, os.path.join("data/processed", 'pokemon.pth'))
-
-        logger.info(f"Created dataset and saved at {os.path.join('data/processed', 'pokemon.pth')}")
-
+    transform = transforms.Compose([
+        transforms.Resize((128,128)),
+        transforms.ToTensor()
+    ])
     
-    else:
-        dataset = pokemon_huggingface()
+    # check if processed datafolder exists, otherwise create it
+    if not os.path.exists("data/processed"):
+        os.makedirs("data/processed")
+
+    train_file_path = "data/interim/train/metadata.jsonl"
+    val_file_path = "data/interim/val/metadata.jsonl"
+    test_file_path = "data/interim/test/metadata.jsonl"
+    
+    train_data = []
+    val_data = []
+    test_data = []
+
+    with open(train_file_path, 'r') as file:
+        for line in file:
+            train_data.append(json.loads(line))
+
+    with open(val_file_path, 'r') as file:
+        for line in file:
+            val_data.append(json.loads(line))
+
+    with open(test_file_path, 'r') as file:
+        for line in file:
+            test_data.append(json.loads(line))
+
+    train_dataset = PokemonDataset(data=train_data, image_folder="data/interim/train", transform=transform)
+    torch.save(train_dataset, os.path.join("data/processed", 'pokemon_train.pth'))
+    logger.info(f"Created dataset and saved at {os.path.join('data/processed', 'pokemon_train.pth')}")
+
+    val_dataset = PokemonDataset(data=val_data, image_folder="data/interim/val", transform=transform)
+    torch.save(val_dataset, os.path.join("data/processed", 'pokemon_val.pth'))
+    logger.info(f"Created dataset and saved at {os.path.join('data/processed', 'pokemon_val.pth')}")
+
+    test_dataset = PokemonDataset(data=test_data, image_folder="data/interim/test", transform=transform)
+    torch.save(test_dataset, os.path.join("data/processed", 'pokemon_test.pth'))
+    logger.info(f"Created dataset and saved at {os.path.join('data/processed', 'pokemon_test.pth')}")
 
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create a Pokemon dataset')
-    parser.add_argument('--framework', choices=['torch', 'huggingface'],
-                        help='Choose between torch or huggingface', default='huggingface')
-
-    args = parser.parse_args() 
-    main(args.framework)
+    main()
     
