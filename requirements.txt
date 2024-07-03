@@ -31,3 +31,4 @@ datasets
 pytest
 tqdm
 loguru
+matplotlib
