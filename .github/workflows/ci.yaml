@@ -23,5 +23,8 @@ jobs:
         run: |
           pip install pytest
           pip install -e .
+      - uses: iterative/setup-dvc@v1
+      - name: Get data
+        run: dvc pull --no-run-cache
       - name: Run tests
         run: pytest tests/test_data.py
