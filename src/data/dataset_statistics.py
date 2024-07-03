@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
-from make_dataset import PokemonDataset
+from make_dataset import PokemonDataset, pokemon_huggingface
 
 def imshow(img, ax, caption):
     npimg = img.numpy()
@@ -25,7 +25,16 @@ def show_batch(dataloader):
     plt.show()
     
 def dataset_statistics():
-    dataset = torch.load("data/processed/pokemon.pth")
+    data = pokemon_huggingface()
+    print(f"Train dataset: Pokemon")
+    print(f"Number of images: {len(data['train'])}")
+    print("\n")
+    print(f"Test dataset: Pokemon")
+    print(f"Number of images: {len(data['test'])}")
+    print("\n")
+    print(f"Validation dataset: Pokemon")
+    print(f"Number of images: {len(data['validation'])}")    
+    dataset = torch.load("data/processed/pokemon_train.pth")
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
     show_batch(dataloader)
 
