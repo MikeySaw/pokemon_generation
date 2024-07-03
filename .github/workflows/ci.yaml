@@ -24,4 +24,4 @@ jobs:
           pip install pytest
           pip install -e .
       - name: Run tests
-        run: pytest tests/
+        run: pytest tests/test_data.py

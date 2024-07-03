@@ -1,23 +1,32 @@
-accelerate>=0.16.0
-bitsandbytes
-click
-datasets
-diffusers
+# accelerate>=0.16.0
+# bitsandbytes
+# click
+# datasets
+# diffusers
+# dvc==3.50.1
+# dvc[gs]
+# ftfy
+# hydra-core
+# Jinja2
+# Kaggle==1.6.14
+# numpy<2.0.0
+# omegaconf
+# pre-commit
+# pytest
+# pytorch_lightning
+# tensorboard
+# torch
+# torchvision
+# tqdm
+# transformers>=4.25.1
+# wandb
+# # xformers
+
 dvc==3.50.1
 dvc[gs]
-ftfy
-hydra-core
-Jinja2
-Kaggle==1.6.14
-numpy<2.0.0
-omegaconf
-pre-commit
-pytest
-pytorch_lightning
-tensorboard
 torch
 torchvision
+numpy<2.0.0
+datasets
+pytest
 tqdm
-transformers>=4.25.1
-wandb
-# xformers
