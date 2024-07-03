@@ -27,7 +27,7 @@ jobs:
 
     - uses: iterative/setup-dvc@v1
     - name: Get data
-      run: dvc pull --no-run-cache
+      run: dvc pull
 
     - name: Check data statistics & generate report
       run: |
