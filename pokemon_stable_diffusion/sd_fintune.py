@@ -10,12 +10,15 @@ https://github.com/CompVis/latent-diffusion
 # To Do: figure out whether we only need to implement the `ddp` into inference or also training process
 # To Do: integrate the pytorch profiler into the training process
 # Import monitor libraries
+import json
+import random
 import os
 import wandb 
 from tqdm import tqdm
 from functools import partial
 import argparse
 import time
+from ddpm_model import ddpm
 
 # Import training libraries
 import numpy as np
@@ -25,10 +28,11 @@ import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 from torch.optim.lr_scheduler import CosineAnnealingLR
 import torchvision
+from torchvision import transforms
 from omegaconf import OmegaConf
 
 # Import Model Libraries
-from models.ldm.data.base import Txt2ImgIterableBaseDataset
+# from models.ldm.data.base import Txt2ImgIterableBaseDataset
 from models.ldm.utils import instantiate_from_config
 
 # Import the formatting libraries
@@ -36,9 +40,11 @@ from typing import List, Tuple, Optional
 from jaxtyping import Array
 
 
-def seed_everything(config):
+def seed_everything(config:OmegaConf):
     """
     Seed everything for reproducibility.
+    Args:
+        config: The configuration file we want to use. -> OmegaConf
     """
     np.random.seed(config.seed)
     torch.manual_seed(config.seed)
@@ -81,82 +87,92 @@ def modify_weights(w, scale = 1e-6, n=2):
         new_w = torch.cat((new_w, extra_w.clone()), dim=1)
     return new_w
 
-class WrappedDataset(Dataset):
+
+# Define a helper function for reproducibility for each workers 
+# The original ldm repo used ImageNet to train the model, we do not have to follow it.
+def worker_init_fn(worker_id):
+    worker_info = torch.utils.data.get_worker_info()
+    dataset = worker_info.dataset
+    worker_id = worker_info.id
+    np.random.seed(np.random.get_state()[1][0] + worker_id)
+
+
+class CustomImageTextDataset(Dataset):
     """
-    A warpper class for the dataset to make it compatible with the DataLoader.
+    A very simplified version of the dataset class codes
     """
-    def __init__(self, dataset):
-        self.dataset = dataset
+    def __init__(self, 
+                 json_file: str, 
+                 img_dir:str, 
+                 transform: Optional[transforms.Compose]=None):
+        with open(json_file, 'r') as f:
+            self.data = json.load(f)
+        self.img_dir = img_dir
+        self.transform = transform or self._default_transform()
+
+    def _default_transform(self):
+        return transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
 
     def __len__(self):
-        return len(self.dataset)
-    
+        return len(self.data)
+
     def __getitem__(self, idx):
-        return self.dataset[idx]
-
-
-# define a class to load the train/test dataset from config files
-class DatasetFromConfig(Dataset):
-    """
-    Define a class to load the corresponding dataset from the config file.
-    Args:
-        config: The configuration file. -> OmegaConf
-    """
-    def __init__(self, batch_size, train=None, validation=None, test=None, inference=None,
-                 wrap=False, num_workers:int=16, shuffle_test_loader=False, shuffle_val_dataloader=False, 
-                 num_val_workers=None, config:Optional[OmegaConf]=None):
-        super(DatasetFromConfig, self).__init__()
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.dict_config = {}
-        if self.num_val_workers is None:
-            self.num_val_workers = num_workers
-        else:
-            self.num_val_workers = num_val_workers
-        self.shuffle_test_loader = shuffle_test_loader
-        self.shuffle_val_dataloader = shuffle_val_dataloader
-        if train is not None:
-            self.dict_config['train'] = train
-            self.train_loader = self._train_loader
-        if validation is not None:
-            self.dict_config['validation'] = validation
-            self.validation_loader = partial(self._validation_loader, shuffle=shuffle_val_dataloader)
-        if test is not None:
-            self.dict_config['test'] = test
-            self.test_loader = partial(self._test_loader, shuffle=shuffle_test_loader)
-        if inference is not None:
-            self.dict_config['inference'] = inference
-            self.inference_loader = self._inference_loader()
-        self.wrap = wrap
-    
-    def load_dataset(self):
-        for config in self.dict_config.values():
-            instantiate_from_config(config)
-    
-    def setup(self):
-        self.datasets = dict(
-            (k, instantiate_from_config(self.dict_config[k]))
-            for k in self.dict_config)
-        if self.wrap:
-            for k in self.datasets:
-                self.datasets[k] = WrappedDataset(self.datasets[k])
-
-    def _train_loader(self):
-        iterable_dataset = isinstance(self.datasets['train'], Txt2ImgIterableBaseDataset)    
-        return DataLoader(self.datasets['train'], batch_size=self.batch_size, 
-                        num_workers=self.num_workers, pin_memory=True, shuffule=False if iterable_dataset else True)
+        item = self.data[idx]
+        img_path = os.path.join(self.img_dir, item['image'])
+        image = Image.open(img_path).convert('RGB')
         
-    def _validation_loader(self):
-        return DataLoader(self.datasets['validation'], batch_size=self.batch_size,
-                          num_workers=self.num_val_workers, pin_memory=True, shuffle=self.shuffle_val_dataloader)
-    
-    def _test_loader(self):
-        return DataLoader(self.datasets['test'], batch_size=self.batch_size,
-                          num_workers=self.num_workers, pin_memory=True, shuffle=self.shuffle_test_loader)
-    
-    def _inference_loader(self):
-        return DataLoader(self.datasets['inference'], batch_size=self.batch_size,
-                          num_workers=self.num_workers, pin_memory=True, shuffle=False)
+        if self.transform:
+            image = self.transform(image)
+        
+        return {
+            'image': image,
+            'text': item['text']
+        }
+
+def get_data_loaders(config):
+    train_dataset = CustomImageTextDataset(
+        json_file=config['train_json'],
+        img_dir=config['img_dir'],
+        transform=transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.RandomCrop(256),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+    )
+
+    val_dataset = CustomImageTextDataset(
+        json_file=config['val_json'],
+        img_dir=config['img_dir'],
+        transform=transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.CenterCrop(256),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+    )
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=config['batch_size'],
+        num_workers=config['num_workers'],
+        shuffle=True
+    )
+
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config['batch_size'],
+        num_workers=config['num_workers'],
+        shuffle=False, 
+        worker_init_fn=None
+    )
+
+    return train_loader, val_loader
+
 
 def setup_training(config:OmegaConf, output_dir:str):
     """
