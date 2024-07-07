@@ -430,6 +430,9 @@ class DDPM(nn.Module):
         x = batch[k]
         if len(x.shape) == 3:
             x = x[..., None]
+        # change the last dimension from 1 to 4
+        if x.shape[-1] == 1:
+            x = x.repeat(1, 1, 1, 4)
         x = rearrange(x, 'b h w c -> b c h w')
         x = x.to(memory_format=torch.contiguous_format).float()
         return x
@@ -466,12 +469,12 @@ class DDPM(nn.Module):
     def check_and_move_tensors(self, device):
         for name, param in self.named_parameters():
             if param.device != device:
-                print(f"Moving parameter {name} to {device}")
+                # print(f"Moving parameter {name} to {device}")
                 param.data = param.data.to(device)
         
         for name, buffer in self.named_buffers():
             if buffer.device != device:
-                print(f"Moving buffer {name} to {device}")
+                # print(f"Moving buffer {name} to {device}")
                 self.register_buffer(name.split('.')[-1], buffer.to(device), persistent=True)
         
         for name, module in self.named_modules():
@@ -1384,7 +1387,7 @@ if __name__=='__main__':
     model = model.to(device)
     model.check_and_move_tensors(device)   
     model.register_buffers_to_device(device) 
-    dummy_input = torch.randn(1, 3, 256, 256).to(device)
+    dummy_input = torch.randn(1, 256, 256).to(device)
     dummy_batch = {model.first_stage_key: dummy_input}
     with torch.inference_mode():
         output = model(dummy_batch)
