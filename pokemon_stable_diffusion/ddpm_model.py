@@ -104,10 +104,10 @@ class DDPM(nn.Module):
                  ignore_keys=[],
                  load_only_unet=False,
                  monitor="val/loss",
-                 use_ema=True,
+                 use_ema=False,
                  first_stage_key="image",
-                 image_size=256,
-                 channels=3,
+                 image_size=128,
+                 channels=4,
                  log_every_t=100,
                  clip_denoised=True,
                  linear_start=1e-4,
@@ -431,9 +431,9 @@ class DDPM(nn.Module):
         if len(x.shape) == 3:
             x = x[..., None]
         # change the last dimension from 1 to 4
-        if x.shape[-1] == 1:
-            x = x.repeat(1, 1, 1, 4)
-        x = rearrange(x, 'b h w c -> b c h w')
+        # if x.shape[-1] == 1:
+        #     x = x.repeat(1, 1, 1, 4)
+        # x = rearrange(x, 'b h w c -> b c h w')
         x = x.to(memory_format=torch.contiguous_format).float()
         return x
 
@@ -443,45 +443,6 @@ class DDPM(nn.Module):
         loss, loss_dict =  self.p_losses(x, t)
         return loss, loss_dict
     
-    # define a function to make sure all the parameters are on the same device
-    # if this function was not defined, the register_buffer will raise an error
-    def to(self, device):
-        self = super().to(device)
-        self.register_buffers_to_device(device)
-        return self
-    
-    def register_buffers_to_device(self, device):
-        for buffer_name, buffer in self.named_buffers():
-            # Split the buffer_name and take the last part
-            name_parts = buffer_name.split('.')
-            last_name = name_parts[-1]
-            
-            # Only register if it's a top-level buffer (no dots in name)
-            if len(name_parts) == 1:
-                self.register_buffer(last_name, buffer.to(device), persistent=True)
-            else:
-                # For nested buffers, navigate to the correct sub-module and register there
-                module = self
-                for part in name_parts[:-1]:
-                    module = getattr(module, part)
-                module.register_buffer(last_name, buffer.to(device), persistent=True)
-
-    def check_and_move_tensors(self, device):
-        for name, param in self.named_parameters():
-            if param.device != device:
-                # print(f"Moving parameter {name} to {device}")
-                param.data = param.data.to(device)
-        
-        for name, buffer in self.named_buffers():
-            if buffer.device != device:
-                # print(f"Moving buffer {name} to {device}")
-                self.register_buffer(name.split('.')[-1], buffer.to(device), persistent=True)
-        
-        for name, module in self.named_modules():
-            if hasattr(module, 'to'):
-                module.to(device)
- 
-
 class LatentDiffusion(DDPM):
     """main class"""
     def __init__(self,
@@ -1382,13 +1343,11 @@ class LatentDiffusion(DDPM):
 if __name__=='__main__':
     from omegaconf import OmegaConf
     model_config = OmegaConf.load('conf/ddpm_config.yaml')
-    model = DDPM(model_config["model"])
+    model = DDPM(model_config["model"]['params']['unet_config'])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
-    model.check_and_move_tensors(device)   
-    model.register_buffers_to_device(device) 
-    dummy_input = torch.randn(1, 256, 256).to(device)
+    dummy_input = torch.randn(1, 4, 64, 64).to(device)
     dummy_batch = {model.first_stage_key: dummy_input}
     with torch.inference_mode():
         output = model(dummy_batch)
-        print(output.shape)
+        print(output)
