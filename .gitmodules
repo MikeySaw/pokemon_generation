@@ -1,0 +1,6 @@
+[submodule "ldm/models/src/clip"]
+	path = ldm/models/src/clip
+	url = https://github.com/openai/CLIP.git
+[submodule "ldm/models/src/taming-transformers"]
+	path = ldm/models/src/taming-transformers
+	url = https://github.com/CompVis/taming-transformers.git
