@@ -107,7 +107,7 @@ class DDPM(nn.Module):
                  use_ema=False,
                  first_stage_key="image",
                  image_size=128,
-                 channels=4,
+                 channels=512,
                  log_every_t=100,
                  clip_denoised=True,
                  linear_start=1e-4,
@@ -397,7 +397,7 @@ class DDPM(nn.Module):
 
         return loss
 
-    def p_losses(self, x_start, t, noise=None):
+    def p_losses(self, x_start, t, noise=None, *args, **kwargs):
         noise = default(noise, lambda: torch.randn_like(x_start))
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
         model_out = self.model(x_noisy, t)
@@ -426,23 +426,27 @@ class DDPM(nn.Module):
 
         return loss, loss_dict
     
+    # def get_input(self, x):
+    #     if len(x.shape) == 3:
+    #         x = x[..., None]
+    #     x = x.to(memory_format=torch.contiguous_format).float()
+    #     return x
+    
     def get_input(self, batch, k):
         x = batch[k]
         if len(x.shape) == 3:
             x = x[..., None]
-        # change the last dimension from 1 to 4
-        # if x.shape[-1] == 1:
-        #     x = x.repeat(1, 1, 1, 4)
-        # x = rearrange(x, 'b h w c -> b c h w')
         x = x.to(memory_format=torch.contiguous_format).float()
+        if isinstance(x, torch.Tensor):
+            x = x.to(torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
         return x
 
-    def forward(self, batch: torch.Tensor):
-        x = self.get_input(batch, self.first_stage_key)
+    def forward(self, x: torch.Tensor):
+        x = self.get_input(x, self.first_stage_key)
         t = torch.randint(0, self.num_timesteps, (x.shape[0],), device=self.betas.device).long()
-        loss, loss_dict =  self.p_losses(x, t)
-        return loss, loss_dict
+        return self.p_losses(x, t)
     
+
 class LatentDiffusion(DDPM):
     """main class"""
     def __init__(self,
@@ -817,6 +821,7 @@ class LatentDiffusion(DDPM):
         return loss
 
     def forward(self, x, c, *args, **kwargs):
+        x, _ = self.get_input(x)
         t = torch.randint(0, self.num_timesteps, (x.shape[0],), device=self.device).long()
         if self.model.conditioning_key is not None:
             assert c is not None
@@ -1346,7 +1351,7 @@ if __name__=='__main__':
     model = DDPM(model_config["model"]['params']['unet_config'])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
-    dummy_input = torch.randn(1, 4, 64, 64).to(device)
+    dummy_input = torch.randn(1, 4, 32, 32).to(device)
     dummy_batch = {model.first_stage_key: dummy_input}
     with torch.inference_mode():
         output = model(dummy_batch)
