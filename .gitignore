@@ -184,3 +184,8 @@ wandb/*
 # lightning logs
 lightning_logs/*
 !lightning_logs/.gitkeep
+
+# ignore the generated images
+src/modeling/data/*
+src/modeling/wandb/*
+/sd-v1-4-full-ema.ckpt
