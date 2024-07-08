@@ -41,6 +41,11 @@ from ldm.modules.attention import CrossAttention
 from ldm.utils import instantiate_from_config
 from ddpm_model import DDPM, disabled_train, uniform_on_device, DiffusionWrapper
 
+import torch
+from transformers import CLIPTextModel, CLIPTokenizer
+from diffusers import AutoencoderKL as AL
+from diffusers import UNet2DConditionModel
+
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
                          'adm': 'y'}
@@ -957,13 +962,30 @@ if __name__ == '__main__':
     first_stage_model = AutoencoderKL(**first_stage_config)
     # first_stage_model.load_state_dict(torch.load(model_params.first_stage_config.ckpt_path))
     model.first_stage_model = first_stage_model
-    model.first_stage_model = model.first_stage_model.to(device)
 
     # Set up the conditioning stage model (CLIP)
     model.cond_stage_model = FrozenCLIPEmbedder()
+    
+    # Load the pretrained weights into the model
+    old_state = torch.load("sd-v1-4-full-ema.ckpt", map_location='cpu')
+    old_state = old_state["state_dict"]
+    
+    # Load the state dict
+    
+    m, u = model.load_state_dict(old_state, strict=False)
+    if len(m) > 0:
+        print("missing keys:")
+        print(m)
+    if len(u) > 0:
+        print("unexpected keys:")
+        print(u)
+
+    # Move to the device!
+    model.first_stage_model = model.first_stage_model.to(device)
     model.cond_stage_model = model.cond_stage_model.to(device)
     model = model.to(device)
 
+    
     # Create dummy inputs
     batch_size = 1
     
