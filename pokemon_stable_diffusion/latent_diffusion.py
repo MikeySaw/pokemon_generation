@@ -19,8 +19,7 @@ from torchvision.utils import make_grid
 import numpy as np
 from torch.optim.lr_scheduler import LambdaLR
 from einops import rearrange, repeat
-from contextlib import contextmanager, nullcontext
-import matplotlib.pyplot as plt
+from contextlib import nullcontext
 import numpy as np
 
 from tqdm import tqdm
@@ -278,7 +277,7 @@ class LatentDiffusion(DDPM):
             if cond_key is None:
                 cond_key = self.cond_stage_key
             if cond_key != self.first_stage_key:
-                if cond_key in ['caption', 'coordinates_bbox', "txt"]:
+                if cond_key in ["caption", "txt", "text"]:
                     xc = batch[cond_key]
                 elif cond_key == 'class_label':
                     xc = batch
@@ -428,7 +427,7 @@ class LatentDiffusion(DDPM):
                 c = self.q_sample(x_start=c, t=tc, noise=torch.randn_like(c.float()))
         return self.p_losses(x, c, t, *args, **kwargs)
 
-    def train_step(self, x):
+    def train_step(self, x, c):
         x, _ = self.get_input(x, self.first_stage_key)
         loss, loss_dict = self(x, c)
         
@@ -460,7 +459,7 @@ class LatentDiffusion(DDPM):
             z = z.view((z.shape[0], -1, ks[0], ks[1], z.shape[-1]))  # (bn, nc, ks[0], ks[1], L )
             z_list = [z[:, :, :, :, i] for i in range(z.shape[-1])]
 
-            if self.cond_stage_key in ["image", "LR_image", "segmentation",
+            if self.cond_stage_key in ["image", "file_name", "segmentation",
                                        'bbox_img'] and self.model.conditioning_key:  # todo check for completeness
                 c_key = next(iter(cond.keys()))  # get key
                 c = next(iter(cond.values()))  # get value
@@ -498,11 +497,11 @@ class LatentDiffusion(DDPM):
                 # tokenize crop coordinates for the bounding boxes of the respective patches
                 patch_limits_tknzd = [torch.LongTensor(self.bbox_tokenizer._crop_encoder(bbox))[None].to(self.device)
                                       for bbox in patch_limits]  # list of length l with tensors of shape (1, 2)
-                print(patch_limits_tknzd[0].shape)
+                # print(patch_limits_tknzd[0].shape)
                 # cut tknzd crop position from conditioning
                 assert isinstance(cond, dict), 'cond must be dict to be fed into model'
                 cut_cond = cond['c_crossattn'][0][..., :-2].to(self.device)
-                print(cut_cond.shape)
+                # print(cut_cond.shape)
 
                 adapted_cond = torch.stack([torch.cat([cut_cond, p], dim=1) for p in patch_limits_tknzd])
                 adapted_cond = rearrange(adapted_cond, 'l b n -> (l b) n')
@@ -966,7 +965,6 @@ if __name__ == '__main__':
     old_state = old_state["state_dict"]
     
     # Load the state dict
-    
     m, u = model.load_state_dict(old_state, strict=False)
     if len(m) > 0:
         print("missing keys:")
@@ -986,7 +984,7 @@ if __name__ == '__main__':
     
     dummy_images = torch.randn(batch_size, 3, 256, 256, device=device)  # Original image size
     # print(dummy_images.device, "this is the device the dummy images are on")
-    dummy_captions = ["A happy Pokemon"] * batch_size
+    dummy_captions = ["Old Italian photo"] * batch_size
 
     # Encode images to latent space
     with torch.no_grad():
@@ -1000,9 +998,9 @@ if __name__ == '__main__':
 
     # Perform a single training step
     model.train()
-    loss, loss_dict = model.train_step({"image": dummy_images, "txt": dummy_captions})
+    loss, loss_dict = model.train_step({"image": dummy_images, "txt": dummy_captions}, c=c)
 
-    # print(f"Loss: {loss.item()}")
+    print(f"Loss: {loss.item()}")
     # print(f"Loss dict: {loss_dict}")
 
     # Test sampling
