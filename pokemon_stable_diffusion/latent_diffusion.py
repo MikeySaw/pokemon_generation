@@ -29,22 +29,17 @@ from PIL import Image
 
 from omegaconf import OmegaConf, ListConfig
 
-from ldm.utils import log_txt_as_img, exists, default, ismap, isimage, count_params, instantiate_from_config
+from ldm.utils import log_txt_as_img, default, ismap, isimage, instantiate_from_config
 from ldm.modules.ema import EMA
-from ldm.modules.diffusionmodules.util import make_beta_schedule, extract_into_tensor, noise_like
-from ldm.modules.distributions.distributions import normal_kl, DiagonalGaussianDistribution
+from ldm.modules.diffusionmodules.util import noise_like
+from ldm.modules.distributions.distributions import DiagonalGaussianDistribution
 from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL
 from ldm.modules.encoders.modules import FrozenCLIPEmbedder
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.modules.attention import CrossAttention
 
 from ldm.utils import instantiate_from_config
-from ddpm_model import DDPM, disabled_train, uniform_on_device, DiffusionWrapper
-
-import torch
-from transformers import CLIPTextModel, CLIPTokenizer
-from diffusers import AutoencoderKL as AL
-from diffusers import UNet2DConditionModel
+from ddpm_model import DDPM, disabled_train
 
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
@@ -985,13 +980,13 @@ if __name__ == '__main__':
     model.cond_stage_model = model.cond_stage_model.to(device)
     model = model.to(device)
 
-    
+
     # Create dummy inputs
     batch_size = 1
     
     dummy_images = torch.randn(batch_size, 3, 256, 256, device=device)  # Original image size
     # print(dummy_images.device, "this is the device the dummy images are on")
-    dummy_captions = ["A cute pokemon"] * batch_size
+    dummy_captions = ["A happy Pokemon"] * batch_size
 
     # Encode images to latent space
     with torch.no_grad():
