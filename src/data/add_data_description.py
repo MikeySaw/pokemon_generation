@@ -1,18 +1,19 @@
-import os 
 import json
-import torch
+import os
 import re
-from tqdm import tqdm
+
 from PIL import Image
+import torch
+from tqdm import tqdm
 from transformers import AutoProcessor, Blip2ForConditionalGeneration
 
 
 def extract_numeric_value(dictionary):
-    match = re.search(r'\d+', dictionary['image'])
+    match = re.search(r"\d+", dictionary["image"])
     return int(match.group()) if match else 0
 
-def add_data_description(image_folder, output_json, processor, model, test=False):
 
+def add_data_description(image_folder, output_json, processor, model, test=False):
     # Set the model to evaluation mode
     model.eval()
 
@@ -33,7 +34,7 @@ def add_data_description(image_folder, output_json, processor, model, test=False
 
         # Add the image path and caption to the data list
         data.append({"file_name": filename, "text": caption})
-        
+
         if test:
             i += 1
 
@@ -45,15 +46,16 @@ def add_data_description(image_folder, output_json, processor, model, test=False
 
     # Save the data to a JSON file
     with open(output_json, "w") as f:
-        json.dump(sorted_data, output_json)    
+        json.dump(sorted_data, f)
 
     print(f"Data saved to {output_json}")
+
 
 if __name__ == "__main__":
     image_folder = "data/raw"
     output_json = "data/pokemon_data.json"
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load the Blip2 model and processor
     processor = AutoProcessor.from_pretrained("Salesforce/blip2-opt-2.7b")
