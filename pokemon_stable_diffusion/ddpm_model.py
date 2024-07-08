@@ -68,10 +68,10 @@ class DiffusionWrapper(nn.Module):
             xc = torch.cat([x] + c_concat, dim=1)
             out = self.diffusion_model(xc, t)
         elif self.conditioning_key == 'crossattn':
-            print(c_crossattn)
+            # print(c_crossattn)
             cc = torch.cat(c_crossattn, 0)
-            print(cc)
-            print(cc.shape)
+            # print(cc)
+            # print(cc.shape)
             out = self.diffusion_model(x, t, context=cc)
         elif self.conditioning_key == 'hybrid':
             xc = torch.cat([x] + c_concat, dim=1)

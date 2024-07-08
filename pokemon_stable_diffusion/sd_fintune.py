@@ -10,19 +10,30 @@ https://github.com/CompVis/latent-diffusion
 # To Do: figure out whether we only need to implement the `ddp` into inference or also training process
 # To Do: integrate the pytorch profiler into the training process
 # Import monitor libraries
+
+# add relative path to import the modules
+import sys
+import os
+
+# Get the current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parental directory, which should include both folders
+project_root = os.path.dirname(current_dir)
+
+# Add the path into the system path
+sys.path.append(project_root)
+
 import json
 import random
 import os
 import wandb 
 from tqdm import tqdm
-from functools import partial
 import argparse
 import time
-from ddpm_model import ddpm
 
 # Import training libraries
 import numpy as np
-import pandas as pd
 from PIL import Image
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
@@ -33,12 +44,13 @@ from omegaconf import OmegaConf
 
 # Import Model Libraries
 # from models.ldm.data.base import Txt2ImgIterableBaseDataset
-from models.ldm.utils import instantiate_from_config
+from ldm.utils import instantiate_from_config
+from latent_diffusion import LatentDiffusion # noqa
+from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL #noqa
+from ldm.modules.encoders.modules import FrozenCLIPEmbedder
 
 # Import the formatting libraries
 from typing import List, Tuple, Optional
-from jaxtyping import Array
-
 
 def seed_everything(config:OmegaConf):
     """
@@ -46,20 +58,15 @@ def seed_everything(config:OmegaConf):
     Args:
         config: The configuration file we want to use. -> OmegaConf
     """
-    np.random.seed(config.seed)
-    torch.manual_seed(config.seed)
-    torch.cuda.manual_seed(config.seed)
+    np.random.seed(config.train.seed)
+    torch.manual_seed(config.train.seed)
+    torch.cuda.manual_seed(config.train.seed)
 
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(config.seed)
-
-# define a placeholder data loading function
-# to do: integrate this function with the `DatasetFromConfig` class
-def get_dataset(config):
-    pass
+        torch.cuda.manual_seed_all(config.train.seed)
 
 # Define a wrapper function to get the kwargs defined by argparse
 # To Do: Need to add more arguments to the parser, right now it is just a placeholder
@@ -97,16 +104,31 @@ def worker_init_fn(worker_id):
     np.random.seed(np.random.get_state()[1][0] + worker_id)
 
 
+# line 846 inside the vanilla lightning notebook started the related part of the dataset
 class CustomImageTextDataset(Dataset):
     """
-    A very simplified version of the dataset class codes
+    A customized dataset class working with huggingface style datasets.
+    args:
+        json_file: the path to the json file containing the metadata of the images.
+        img_dir: the path to the directory containing the images.
+        transform: the transformation function to apply to the images.
+        max_samples: the maximum number of samples to load from the dataset.
+    returns:
+        a dictionary containing the image and the text.
     """
     def __init__(self, 
                  json_file: str, 
                  img_dir:str, 
-                 transform: Optional[transforms.Compose]=None):
+                 transform: Optional[transforms.Compose]=None,
+                 max_samples: int=2000
+                 ):
         with open(json_file, 'r') as f:
-            self.data = json.load(f)
+            all_metadata = [json.loads(line) for line in f]
+        self.meta_data = [metadata for metadata in all_metadata 
+                          if "pokemon" in metadata['text'].lower()]
+        random.shuffle(self.meta_data)
+        self.data = self.meta_data[:max_samples] # load part of the whole dataset
+
         self.img_dir = img_dir
         self.transform = transform or self._default_transform()
 
@@ -121,8 +143,12 @@ class CustomImageTextDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        item = self.data[idx]
-        img_path = os.path.join(self.img_dir, item['image'])
+        data = self.meta_data[idx]
+        img_path = data['file_name']
+        caption = data['text'].strip() 
+
+        # define training data path and load the images
+        img_path = os.path.join(self.img_dir, img_path)
         image = Image.open(img_path).convert('RGB')
         
         if self.transform:
@@ -130,13 +156,17 @@ class CustomImageTextDataset(Dataset):
         
         return {
             'image': image,
-            'text': item['text']
+            'txt': caption
         }
 
-def get_data_loaders(config):
+def get_data_loaders(config:OmegaConf, 
+                     json_file:Optional[str]=None, 
+                     img_dir:Optional[str]=None, 
+                     batch_size:Optional[int]=None,
+                     num_workers:Optional[int]=None):
     train_dataset = CustomImageTextDataset(
-        json_file=config['train_json'],
-        img_dir=config['img_dir'],
+        json_file=json_file if json_file else config['train']['json_file'],
+        img_dir=img_dir if img_dir else config['train']['img_dir'],
         transform=transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.RandomCrop(256),
@@ -146,8 +176,8 @@ def get_data_loaders(config):
     )
 
     val_dataset = CustomImageTextDataset(
-        json_file=config['val_json'],
-        img_dir=config['img_dir'],
+        json_file=json_file if json_file else config['train']['val_json'],
+        img_dir=json_file if json_file else config['train']['img_dir'],
         transform=transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.CenterCrop(256),
@@ -156,22 +186,22 @@ def get_data_loaders(config):
         ])
     )
 
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config['batch_size'],
-        num_workers=config['num_workers'],
-        shuffle=True
-    )
+    # train_loader = DataLoader(
+    #     train_dataset,
+    #     batch_size=batch_size if json_file else config['train']['batch_size'],
+    #     num_workers=num_workers if json_file else config['train']['num_workers'],
+    #     shuffle=True
+    # )
 
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config['batch_size'],
-        num_workers=config['num_workers'],
-        shuffle=False, 
-        worker_init_fn=None
-    )
+    # val_loader = DataLoader(
+    #     val_dataset,
+    #     batch_size=batch_size if batch_size else config['train']['batch_size'],
+    #     num_workers=config['train']['num_workers'],
+    #     shuffle=False, 
+    #     worker_init_fn=None
+    # )
 
-    return train_loader, val_loader
+    return train_dataset, val_dataset
 
 
 def setup_training(config:OmegaConf, output_dir:str):
@@ -223,6 +253,7 @@ def log_images(images:torch.Tensor, step:int, output_dir:str=None, use_wandb:boo
         if output_dir:
             image_path = os.path.join(output_dir, f"{k}_{step}.png")
             torchvision.utils.save_image(v, image_path)
+
         if use_wandb:
             wandb.log({k:[wandb.Image(image) for image in v]})
 
@@ -236,65 +267,105 @@ def get_cuda_status(start_time):
     cuda_peak_memory = torch.cuda.max_memory_allocated() / 2 ** 20
     elapsed_time = time.time() - start_time 
     
-    # use this flag to check whether there is a wandb process running already
-    if wandb.run is not None:
-        wandb.log({'cuda_max_memory': cuda_peak_memory, 'elapsed_time': elapsed_time})
+    # this flag has already been integrated into the training loop, mayb need to be removed
+    # if wandb.run is not None:
+    #     wandb.log({'cuda_max_memory': cuda_peak_memory, 'elapsed_time': elapsed_time})
         
     return cuda_peak_memory, elapsed_time
 
-
 # define the main function to train and test the model
-def main():
+def main(path:str):
     # Load configuration
-    config = OmegaConf.load('config/default_config.yaml')
+    config = OmegaConf.load(path)
+
+    # define reproducibility
+    seed_everything(config)
     
     # Initialize wandb, log all the hyperparameters loaded from the OmegeConf
-    wandb.init(project=config.project_name, config=OmegaConf.to_container(config, resolve=True))
+    wandb.init(project=config.train.project_name, config=OmegaConf.to_container(config, resolve=True))
     # I felt like the following line will also work 
     # wandb.init(project=config.project_name, config=dict(config))    
+    json_file = config.train.json_file_path
+    img_dir = config.train.img_dir
+    batch_size = config.train.batch_size
+    num_workers = config.train.num_workers
 
     # Set device, this may need to be changed if the `ddp` is integrate into the training process
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(config.train.device) if config.train.device else \
+        torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
     # Load dataset
     # to do:need to load multiple datasets, right now there is only train data here.
-    dataset = get_dataset(config.data)
-    dataloader = DataLoader(dataset, 
-                            batch_size=config.batch_size, 
+    train_set, _ = get_data_loaders(config, json_file, img_dir, batch_size, num_workers)
+    dataloader = DataLoader(train_set, 
+                            batch_size=config.train.batch_size, 
                             shuffle=True, 
-                            num_workers=config.num_workers, 
-                            pin_memory=config.pin_memory)
+                            num_workers=config.train.num_workers, 
+                            pin_memory=config.train.pin_memory)
 
-    # Initialize model
-    model = instantiate_from_config(config.model)
+    model_params = config.model.params
+    
+    # Instantiate the model
+    model = LatentDiffusion(**model_params)
+
+    # Load and set up the first stage model (VAE)
+    first_stage_config = model_params.first_stage_config.params
+    first_stage_model = AutoencoderKL(**first_stage_config)
+    # first_stage_model.load_state_dict(torch.load(model_params.first_stage_config.ckpt_path))
+    model.first_stage_model = first_stage_model
+
+    # Set up the conditioning stage model (CLIP)
+    model.cond_stage_model = FrozenCLIPEmbedder()
+    
+    # Load the pretrained weights into the model
+    old_state = torch.load("sd-v1-4-full-ema.ckpt", map_location='cpu')
+    old_state = old_state["state_dict"]
+    
+    # Load the state dict
+    m, u = model.load_state_dict(old_state, strict=False)
+    if len(m) > 0:
+        print("missing keys:")
+        print(m)
+    if len(u) > 0:
+        print("unexpected keys:")
+        print(u)
+
+    # Move to the device!
+    model.first_stage_model = model.first_stage_model.to(device)
+    model.cond_stage_model = model.cond_stage_model.to(device)
     model = model.to(device)
 
+
     # Initialize optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config.train.learning_rate, weight_decay=config.train.weight_decay)
 
     # Initialize learning rate scheduler
-    scheduler = CosineAnnealingLR(optimizer, T_max=config.num_epochs, eta_min=config.min_lr)
+    scheduler = CosineAnnealingLR(optimizer, T_max=config.train.num_epochs, eta_min=config.train.min_lr)
     
     # Training loop
-    for epoch in range(config.num_epochs):
+    for epoch in range(config.train.num_epochs):
         model.train()
         epoch_loss = 0.0
         start_time = time.time()
         torch.cuda.reset_peak_memory_stats() # reset the peak memory stats to calculate the peak memory usage
-        with tqdm(dataloader, desc=f"Epoch {epoch+1}/{config.num_epochs}") as pbar:
+        with tqdm(dataloader, desc=f"Epoch {epoch+1}/{config.train.num_epochs}") as pbar:
             for batch in pbar:
                 # Move batch to device
-                batch = batch.to(device)
+                image = batch['image'].to(device)
+                text = batch['txt']
+
+                # get the input condition
+                c = model.get_learned_conditioning(text)
 
                 # Forward pass
-                loss = model(batch)
+                loss, _ = model.train_step({"image": image, "txt": text}, c=c)
 
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
                 
                 # Gradient clipping to stabilize training
-                torch.nn.utils.clip_grad_norm_(model.parameters(), config.max_grad_norm)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.max_grad_norm)
                 
                 optimizer.step()
 
@@ -308,6 +379,8 @@ def main():
                     "epoch": epoch,
                     "learning_rate": optimizer.param_groups[0]['lr']
                 })
+        
+        epoch_time, peak_memory = get_cuda_status(start_time)
 
         # Step the scheduler
         scheduler.step()
@@ -315,11 +388,14 @@ def main():
         # Log epoch metrics
         wandb.log({
             "epoch_loss": epoch_loss / len(dataloader),
-            "epoch": epoch
+            "epoch": epoch,
+            "epoch_time": epoch_time,
+            "peak_memory": peak_memory
         })
 
-        # Save checkpoint
-        if (epoch + 1) % config.save_every == 0:
+        # Save checkpoint every `save_every` epochs
+
+        if (epoch + 1) % config.train.save_every == 0:
             checkpoint_path = f"checkpoint_epoch_{epoch+1}.pth"
             torch.save({
                 'epoch': epoch,
@@ -333,4 +409,4 @@ def main():
     wandb.finish()
 
 if __name__ == "__main__":
-    main()
+    main("conf/ddpm_config.yaml")
