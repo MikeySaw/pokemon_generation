@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-
 RUN pip install . --no-deps --no-cache-dir
 
 # run the training script
-ENTRYPOINT ["python", "-u", "src/modeling/training.py", "hydra.job.chdir=False"]
+ENTRYPOINT ["python", "-u", "src/modeling/OLD_training.py", "hydra.job.chdir=False"]
 
 # run the following commands to use the file:
 #    sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest

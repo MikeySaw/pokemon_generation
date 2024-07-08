@@ -1,4 +1,0 @@
-# @package _group_
-image_size: [128, 128]
-image_path: "data/raw"
-processed_path: "data/processed"

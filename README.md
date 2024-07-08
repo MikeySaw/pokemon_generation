@@ -11,6 +11,7 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 <a name="top"></a>
 
 ## Acknowledgement
+
 Everyone contributed equal and faily during the whole project! 🙌🙌🙌
 
 ## In Construction... 🚧🚧🚧
@@ -34,7 +35,7 @@ For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. Y
 __TL;DR__: put the things you felt like are more detailed than a general _To Do_ but havn't started yet here: \
 
 - [ ] Create a slower version of inference deliberately, play with the `profiler` than make it faster later 💃💃💃, also play with slower/memory bad behavior first (use `.to(device) instead of (device=device), etc.)
-- [ ] Create a `Model Zoo` section like the `latent diffusion` repo and put the pretrained weights into this section, we can either put the pretrained weights into a `Google Drive` folder or just use `dvc` to pull the weights and write down the command to `cd` to the path of the pretrained weights. 
+- [ ] Create a `Model Zoo` section like the `latent diffusion` repo and put the pretrained weights into this section, we can either put the pretrained weights into a `Google Drive` folder or just use `dvc` to pull the weights and write down the command to `cd` to the path of the pretrained weights.
 
 ## To Do/Try to do
 
@@ -43,7 +44,7 @@ Some tests will be done in the coming weeks, right now what we need to change in
 - [ ] Check/Fix the paths inside different test files.
 - [x] Get a more easier to test model to replace the one inside the `, the SD model right now requires huge GPU RAM to test
 - [x] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters,
-- [ ] Change the Stable Diffusion finetuning .py yaml file into a correct one, right now it is just a placeholder. 
+- [ ] Change the Stable Diffusion finetuning .py yaml file into a correct one, right now it is just a placeholder.
 
 ## Experiment Command Lines Guidance(Experiments Version)
 
@@ -72,23 +73,28 @@ pre-commit run --files YOUR_FILE_NAME
 ```
 
 ### Train a diffusion model from scratch
+
 __This section is still under heavy construction work__, please come back very often to check the newest progress about our project 🤩🤩🤩
 To train a diffusion model from scratch, simply run the following commands:
+
 ```shell
 cd src/modeling/
 python train_ddpm_example.py
 ```
+
 Alert!!!🚨🚨🚨 You must have a very nice GPU if you want to run the training commands!
 
 ### Test Stable Diffusion Model with a dummy input
+
 To test Stable Diffusion Model with a dummy input (already prepared for you!), simply run the following commands:
+
 ```
 python pokemon_stable_diffusion/latent_diffusion.py 
 ```
+
 This will run the `dummy training` process based on a `dummy image` and a `dummy txt`. \
 You will see the generated images `sample_0.png`, if the code is executed correctly.
 __Alert!You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
-
 
 ### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
 
@@ -248,7 +254,7 @@ Specifying "hydra.job.chdir=False" is necessary because hydra changes the workin
 To run the model training script src/modeling/training.py in a reproducible docker container first build an image using the following command:
 
 ```shell
-docker build -f dockerfiles/training.dockerfile . -t training:<image_tag>
+docker build -f dockerfiles/OLD_training.dockerfile . -t training:<image_tag>
 ```
 
 Then run the training script in a container using:
