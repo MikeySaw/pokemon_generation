@@ -33,6 +33,7 @@ extend-include = ["*.ipynb"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
+extend-unfixable = ["F401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
