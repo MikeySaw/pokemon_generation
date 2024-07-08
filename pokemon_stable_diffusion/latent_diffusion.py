@@ -29,17 +29,17 @@ from PIL import Image
 
 from omegaconf import OmegaConf, ListConfig
 
-from ldm.utils import log_txt_as_img, exists, default, ismap, isimage, count_params, instantiate_from_config
+from ldm.utils import log_txt_as_img, default, ismap, isimage, instantiate_from_config
 from ldm.modules.ema import EMA
-from ldm.modules.diffusionmodules.util import make_beta_schedule, extract_into_tensor, noise_like
-from ldm.modules.distributions.distributions import normal_kl, DiagonalGaussianDistribution
+from ldm.modules.diffusionmodules.util import noise_like
+from ldm.modules.distributions.distributions import DiagonalGaussianDistribution
 from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL
 from ldm.modules.encoders.modules import FrozenCLIPEmbedder
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.modules.attention import CrossAttention
 
 from ldm.utils import instantiate_from_config
-from ddpm_model import DDPM, disabled_train, uniform_on_device, DiffusionWrapper
+from ddpm_model import DDPM, disabled_train
 
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
@@ -957,19 +957,36 @@ if __name__ == '__main__':
     first_stage_model = AutoencoderKL(**first_stage_config)
     # first_stage_model.load_state_dict(torch.load(model_params.first_stage_config.ckpt_path))
     model.first_stage_model = first_stage_model
-    model.first_stage_model = model.first_stage_model.to(device)
 
     # Set up the conditioning stage model (CLIP)
     model.cond_stage_model = FrozenCLIPEmbedder()
+    
+    # Load the pretrained weights into the model
+    old_state = torch.load("sd-v1-4-full-ema.ckpt", map_location='cpu')
+    old_state = old_state["state_dict"]
+    
+    # Load the state dict
+    
+    m, u = model.load_state_dict(old_state, strict=False)
+    if len(m) > 0:
+        print("missing keys:")
+        print(m)
+    if len(u) > 0:
+        print("unexpected keys:")
+        print(u)
+
+    # Move to the device!
+    model.first_stage_model = model.first_stage_model.to(device)
     model.cond_stage_model = model.cond_stage_model.to(device)
     model = model.to(device)
+
 
     # Create dummy inputs
     batch_size = 1
     
     dummy_images = torch.randn(batch_size, 3, 256, 256, device=device)  # Original image size
     # print(dummy_images.device, "this is the device the dummy images are on")
-    dummy_captions = ["A cute pokemon"] * batch_size
+    dummy_captions = ["A happy Pokemon"] * batch_size
 
     # Encode images to latent space
     with torch.no_grad():
