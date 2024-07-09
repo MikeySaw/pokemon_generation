@@ -101,16 +101,18 @@ end of the project.
 ## Group information
 
 ### Question 1
+>
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 > Answer:
 
-Michael Sawitzki
-Meimingwei Li
-Luis Karrlein
+Michael Sawitzki\
+Meimingwei Li\
+Luis Karrlein\
 Gamze G. Kasman
 
 ### Question 2
+>
 > **Enter the study number for each member in the group**
 >
 > Example:
@@ -119,12 +121,13 @@ Gamze G. Kasman
 >
 > Answer:
 
-12150362
-TODO:
-TODO:
-TODO:
+Michael Sawitzki: &emsp;                  12150362\
+Meimingwei Li:    &emsp;&emsp;            TODO\
+Luis Karrlein:    &emsp;&emsp;&emsp;      12285004\
+Gamze G. Kasman:  &emsp;                  TODO
 
 ### Question 3
+>
 > **What framework did you choose to work with and did it help you complete the project?**
 >
 > Recommended answer length: 100-200 words.
@@ -154,7 +157,7 @@ TODO:
 >
 > Answer:
 
---- question 4 fill here ---
+Our project repository comes as an installable python package. Using setuptools, we configured our project to read the package dependencies with their required versions from the requirements.txt file when it is installed. Specifying the version numbers of the packages was important because we encountered bugs with newer versions of some packages, such as dvc. In the pyproject.toml, we also specified the required python version, which is checked by setuptools upon installing the package. A new group member would just have to install a compatible python version and then the package before they could also work on the project.
 
 ### Question 5
 
@@ -169,7 +172,7 @@ TODO:
 > *experiments.*
 > Answer:
 
---- question 5 fill here ---
+We decided to use the new version of the Cookiecutter Data Science template (version 2.0) as we deemed it to have a clearer structure than the previous version. We however did not use every folder that came with the template, some like the refs and we removed those from the tree. Most notably, we needed to remove the data folder, because we used dvc for version control that is decoupled from git. We also added some small folders e.g. for collecting logging data from pytorch lightning or hydra.
 
 ### Question 6
 
@@ -180,7 +183,7 @@ TODO:
 >
 > Answer:
 
---- question 6 fill here ---
+We added linting checks that every time a new pull request is created. For this purpose we used the ruff linter. We also used ruff to format our code as it comes with a formatter as well. To configure ruff globally for our team, we added the linting and formatting rules to the pyproject.toml file.
 
 ## Version control
 
@@ -229,7 +232,7 @@ TODO:
 >
 > Answer:
 
---- question 9 fill here ---
+Because we are multiple people, it was important for us to work on different branches to make our changes reproducible and avoid conficting changes. Every time a team member wanted to make a change to the main branch of our project, they had to create a pull request. We also used this step to run tests to see if the new changes are compatible with the existing code. Following the DevOps mantra of continuous integration we used github actions, that are triggered every time we create a pull request, to lint and test the code.
 
 ### Question 10
 
