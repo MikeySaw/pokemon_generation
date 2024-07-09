@@ -77,7 +77,7 @@ train:
   log_every: 100
   save_every: 10
   max_grad_norm: 0.0
-  json_file_path: "data/interim/train/metadata.jsonl"
+  json_file_path: "metadata.jsonl"
   log_dir: "logs"
   checkpoint_dir: "checkpoints"
   resume: "checkpoints/last.ckpt"
