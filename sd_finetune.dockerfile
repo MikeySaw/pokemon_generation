@@ -30,6 +30,8 @@ COPY ldm/  ldm/
 COPY pokemon_stable_diffusion/ pokemon_stable_diffusion/
 COPY real_requirements.txt real_requirements.txt
 COPY metadata.jsonl metadata.jsonl
+COPY data/ data/    
+RUN find data/ -type f | wc -l
 
 RUN pip install -r real_requirements.txt --no-cache-dir
 
@@ -39,4 +41,4 @@ RUN pip install -r real_requirements.txt --no-cache-dir
 ENTRYPOINT ["python", "/pokemon_stable_diffusion/sd_fintune.py"]
 # ENTRYPOINT ["python", "-u", "pokemon_generation/modeling/train_example.py", "train"]
 # run the following commands to use the file:
-#    sudo docker run -e WANDB_API_KEY=YOUR_WANDB_KEY trainer:latest
+#    sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY trainer:latest
