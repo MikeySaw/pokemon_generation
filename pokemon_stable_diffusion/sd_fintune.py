@@ -45,12 +45,12 @@ from omegaconf import OmegaConf
 # Import Model Libraries
 # from models.ldm.data.base import Txt2ImgIterableBaseDataset
 from ldm.utils import instantiate_from_config
-from latent_diffusion import LatentDiffusion # noqa
-from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL #noqa
+from ldm.models.autoencoder import AutoencoderKL #noqa
 from ldm.modules.encoders.modules import FrozenCLIPEmbedder
+from .latent_diffusion import LatentDiffusion # noqa
 
 # Import the formatting libraries
-from typing import List, Tuple, Optional
+from typing import Optional
 
 def seed_everything(config:OmegaConf):
     """
