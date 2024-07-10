@@ -48,7 +48,7 @@ Some tests will be done in the coming weeks, right now what we need to change in
 
 ## Experiment Command Lines Guidance(Experiments Version)
 
-### Starting Point Alarm! 🚨🚨🚨 <a href="#top">[Back to Top]</a>
+### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
 
 Before start to `git add` anything related to this repo, please make sure you run the following commands! 😱😱😱
 
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 # run the pre-commit hook to check/modify your file you wanna push!😱 
 pip install pre-commit 
 
-# Alert!!!💥💥💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
+# Alert!!!💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
 pre-commit run --all-files
 
 # Only want to check one file? 😱 Use this command instead!
@@ -82,7 +82,7 @@ cd src/modeling/
 python train_ddpm_example.py
 ```
 
-Alert!!!🚨🚨🚨 You must have a very nice GPU if you want to run the training commands!
+Alert!!!🚨 You must have a very nice GPU if you want to run the training commands!
 
 ### Test Stable Diffusion Model with a dummy input
 
@@ -96,7 +96,7 @@ This will run the `dummy training` process based on a `dummy image` and a `dummy
 You will see the generated images `sample_0.png`, if the code is executed correctly.
 __Alert!You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
 
-### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
+### Data Download Part 🚚 <a href="#top">[Back to Top]</a>
 
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
@@ -179,7 +179,7 @@ def test_...(*args, **kwargs):
     ...
 ```
 
-### Dockerfile Test <a href="#top">[Back to Top]</a>
+### Dockerfile Test🐋<a href="#top">[Back to Top]</a>
 
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile.
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
@@ -195,7 +195,7 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
 
-### Dockerfile Building Up commmands <a href="#top">[Back to Top]</a>
+### Dockerfile Building Up commmands🐳 <a href="#top">[Back to Top]</a>
 To build the training dockerfile, please run the following commands:
 ```shell
 # If you encounter issues, consider use `sudo` before the whole command
@@ -228,7 +228,7 @@ docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY fd_train:latest
 Please replace the `YOUR_WANDB_KEY` with your own `wandb` authorization token, to get your own token, simply click the following link: [wandb authorization link](db.ai/authorize), then login and copy paste your own authorization token.
 Please do not forget the `--gpus all` flags, this will automatically🪄activate your _NVIDIA GPU_ if your machine has one. Enjoy the fast training! 🏄‍♀️
 
-#### Docker Debug Guidance
+#### Docker Debug Guidance🧑🏿‍🔧
 Before you start to build another (large!) dockerfile, you may consider to check which dockerfile you already have:
 ```shell
 docker images
@@ -270,7 +270,46 @@ sudo systemctl restart docker
 ```
 After running those commands, your dockerfile should now work with GPU support very smoothly!🏎️
 
-### Deploy model via Google Cloud🧨
+### Cloud Training commands☁️ <a href="#top">[Back to Top]</a>
+To start the cloud training in _GCloud Compute Engine_ with _Nvidia GPU_ support, simply run the following commands to check the available GPUs in different ZONE first:
+```shell
+gcloud compute accelerator-types list
+```
+Since we are not going to train the whole model on _GCloud Compute Engine_ engine, we do not need anything more advanced than _Nvidia T4_, also, it is really hard and expensive to get any GPU besides the _T4_.
+Try to run the following command to see if we could successfully create a compute engine with GPU support:
+```shell
+gcloud compute instances create adios1 \
+--zone="us-west4-a" \
+--image-family="pytorch-latest-gpu" \
+--image-project=deeplearning-platform-release \
+--accelerator="type=nvidia-tesla-t4,count=1" \
+--maintenance-policy TERMINATE 
+```
+When you successfully created an instance, _ssh_ to the instance to launch your training.
+```shell
+# check the compute instances we created already 
+gcloud compute instances list
+
+# ssh to the one with GPU support
+gcloud beta compute ssh <instance-name>
+```
+
+If there is no enough computation resources for _Compute Engine_, you will receive an error message like this:
+```shell
+message: The zone 'projects/PROJ_ID/zones/ZONE' does not
+  have enough resources available to fulfill the request.  Try a different zone, or
+  try again later.
+```
+We have to use _Vertex AI_ if there is no computation resources available at the moment. \
+we define our training config file in `job_config.yaml`, then we will build and push the training docker image into the `Artifact Registry`:
+```shell
+gcloud ai custom-jobs create \
+  --region=us-central1 \
+  --display-name=pokemon-training-job \
+  --config=job_config.yaml
+```
+
+### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a>
 To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
 Run the following command to enable the _Cloud Run_ service via command line:
 ```shell
@@ -313,7 +352,7 @@ The terminal should then return a message like this:
 Deploying container to Cloud Run service [YOUR_SERVICE_NAME] in project [YOUR_PROJ_ID] region [LOCATION]
 ```
 
-#### Model Deployment Debug Guidance
+#### Model Deployment Debug Guidance👩‍🔧
 A user may always used `sudo` command before every commands used before without encountering an issue, however, this will cause severe authorization issues if you try to push your image into your _Artifact Registry_, you will always encounter authorize issues when you pusn the images:
 ```shell
 denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/my-project/locations/LOCATION/repositories/my-repo"
