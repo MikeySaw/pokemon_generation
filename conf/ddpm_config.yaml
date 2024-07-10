@@ -92,3 +92,5 @@ train:
   learning_rate: 1.0e-04
   weight_decay: 0.0
   min_lr: 1.0e-06
+  pretrained_path: "sd-v1-4-full-ema.ckpt"
+  precision: 32
