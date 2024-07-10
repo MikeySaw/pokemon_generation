@@ -1,6 +1,8 @@
 import pytest
 import torch
+
 from pokemon_stable_diffusion.ddpm_model import DDPM
+
 
 @pytest.fixture
 def ddpm_model():

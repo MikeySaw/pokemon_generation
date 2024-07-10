@@ -1,8 +1,11 @@
-# tests/test_diffusion.py
-import sys
 import os
+import sys
+
 import pytest
 import torch
+
+from pokemon_stable_diffusion.ddpm_model import DDPM
+from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
 
 # Get the current directory and project root
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,10 +16,6 @@ sys.path.append(project_root)
 
 # Ensure the correct paths are added
 sys.path.append(os.path.join(project_root, 'pokemon_stable_diffusion'))
-
-# Import the DDPM and LatentDiffusion modules
-from pokemon_stable_diffusion.ddpm_model import DDPM
-from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
 
 # Fixture to create a simple instance of the DDPM model
 @pytest.fixture
@@ -115,7 +114,6 @@ def latent_diffusion_model():
         "original_elbo_weight": 0.,
         "v_posterior": 0.,
         "l_simple_weight": 1.,
-        "conditioning_key": None,
         "parameterization": "eps",
         "scheduler_config": None,
         "use_positional_encodings": False,

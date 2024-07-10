@@ -1,9 +1,9 @@
-# tests/test_model_initialization.py
-
 import pytest
 import torch
 import torch.nn as nn
-from pokemon_stable_diffusion.ddpm_model import DDPM, DiffusionWrapper
+
+from pokemon_stable_diffusion.ddpm_model import DDPM
+
 
 class DummyModel(nn.Module):
     def __init__(self, image_size, in_channels, out_channels):
@@ -13,6 +13,7 @@ class DummyModel(nn.Module):
 
     def forward(self, x, t, context=None):
         return self.relu(self.conv(x))
+
 
 @pytest.mark.parametrize("image_size, channels, use_ema", [
     (32, 3, False),

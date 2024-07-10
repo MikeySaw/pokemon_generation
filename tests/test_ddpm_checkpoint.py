@@ -1,8 +1,11 @@
-# tests/test_ddpm_checkpoint.py
-import sys
 import os
+import sys
+
 import pytest
 import torch
+
+# Import the DDPM module
+from pokemon_stable_diffusion.ddpm_model import DDPM
 
 # Get the current directory and project root
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,9 +16,6 @@ sys.path.append(project_root)
 
 # Ensure the correct paths are added
 sys.path.append(os.path.join(project_root, 'pokemon_stable_diffusion'))
-
-# Import the DDPM module
-from pokemon_stable_diffusion.ddpm_model import DDPM
 
 # Fixture to create a simple instance of the DDPM model
 @pytest.fixture
