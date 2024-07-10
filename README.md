@@ -158,7 +158,7 @@ For github actions related file, please check the `.github/workflows`, this fold
 the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
 the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo.
 
-#### Pre-Commit Hook
+#### Pre-Commit Hook <a href="#top">[Back to Top]</a>
 
 To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
@@ -194,6 +194,137 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 ```
 
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
+
+### Dockerfile Building Up commmands <a href="#top">[Back to Top]</a>
+To build the training dockerfile, please run the following commands:
+```shell
+# If you encounter issues, consider use `sudo` before the whole command
+docker build -f sd_finetune.dockerfile . -t fd_train:latest
+```
+
+For `MAC A1/A2` chip user, you may consider to use this command if you want to deploy the model on cloud later:
+```shell
+docker build --platform linux/amd64 -f sd_finetune.dockerfile . -t fd_train:latest
+```
+
+
+To build the data test dockerfile to test if `dvc` is working correctly, simply run the following codes:
+```shell
+# If you encounter issues, consider use `sudo` before the whole command
+docker build -f dvcdata.dockerfile . -t fd_data:latest
+```
+
+To build upon `app.py` and deploy your lovely model on _Google Cloud_ later, simply run the following commands:
+```shell
+docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+```
+
+To run the training dockerfile you just build, simply run the following commands: \
+__Alert! 🚨The following dockerfile includes GPU training support, automatical dvc data preparation, and Wandb logging, please make sure you have all the env prepared!__
+__Alert! 🚨The Stable Diffusion fine-tuning needs at least 18 GB RAM GPU to run, use server or consider rent a GPU if you want to run the following dockerfile__
+```shell
+docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY fd_train:latest
+```
+Please replace the `YOUR_WANDB_KEY` with your own `wandb` authorization token, to get your own token, simply click the following link: [wandb authorization link](db.ai/authorize), then login and copy paste your own authorization token.
+Please do not forget the `--gpus all` flags, this will automatically🪄activate your _NVIDIA GPU_ if your machine has one. Enjoy the fast training! 🏄‍♀️
+
+#### Docker Debug Guidance
+Before you start to build another (large!) dockerfile, you may consider to check which dockerfile you already have:
+```shell
+docker images
+```
+If you find out you accidently built a dockerfile you do not need anymore, run the following command to delete the dockerfile
+```shell
+docker rmi IMAGE_ID
+```
+If you encounter issues with deleting the dockerfiles, copy paste the sequence of numbers at the end of your error message, then try the following two commands:
+```shell
+docker rm numbers
+# or
+docker rmi numbers
+# then try to delete the docker images again
+docker rmi IMAGE_ID
+```
+
+If `--gpus all` flag returns an error with GPU support, you may need to check the following commands:
+```shell
+# check if the nvidia-driver is installed 
+# go to their website and download the driver if you do not have one already
+nvidia-smi
+
+# check if the compiler is correct/cuda tookit is available
+nvcc --version
+# you may need sudo rights if nvcc command is not recognized by your machine
+# sudo apt install nvidia-cuda-toolkit
+```
+
+If the commands before did not solve the error you are encountering, you may need an extra tookit for your dockerfile to run with a GPU support;
+```shell
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+After running those commands, your dockerfile should now work with GPU support very smoothly!🏎️
+
+### Deploy model via Google Cloud🧨
+To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
+Run the following command to enable the _Cloud Run_ service via command line:
+```shell
+gcloud services enable run.googleapis.com
+``` 
+You can actually do everything via command line without going to the _Cloud Console_, command line is all you need!💯
+To build an _Artifact Registry_ then use it for Cloud Deployment, simply run with:
+```shell
+gcloud artifacts repositories create CUSTOM_NAME --repository-format=docker --location=LOCATION --description="DESCRIPTION"
+```
+You need to authorize before you start to build and push your cloud deployment dockerfile:
+```shell
+gcloud auth login
+gcloud auth configure-docker
+gcloud auth configure-docker LOCATION.pkg.dev
+
+# verify you are in the correct project
+gcloud config set project YOUR_PROJ_ID
+
+# If you havn't build the dockerfile you want to deploy, run the following commands:
+docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+docker tag gcp_test_app LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
+
+# To push the docker image to your Artifact Registry, run this command
+docker push LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
+```
+After you successfully pushed your images already, run the following commands in terminal to deploy your model on _Cloud Run_
+```shell
+gcloud run deploy YOUR_SERVICE_NAME   \
+--image LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app   \
+--platform managed   \
+--region us-central1   \
+--allow-unauthenticated   \
+--memory 32Gi   \
+--cpu 8 \
+``` 
+
+The terminal should then return a message like this:
+```shell
+Deploying container to Cloud Run service [YOUR_SERVICE_NAME] in project [YOUR_PROJ_ID] region [LOCATION]
+```
+
+#### Model Deployment Debug Guidance
+A user may always used `sudo` command before every commands used before without encountering an issue, however, this will cause severe authorization issues if you try to push your image into your _Artifact Registry_, you will always encounter authorize issues when you pusn the images:
+```shell
+denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/my-project/locations/LOCATION/repositories/my-repo"
+```
+To solve this issue, the following two steps may needed, please run both of them, then login and logout from your PC to make it work.
+To avoid using the `sudo` again for anything related to docker, please run the following command:
+```shell
+sudo usermod -aG docker $USER
+```
+Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
+After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
 ### Model Building and Multi-GPUs training with Diffusers and Huggingface
 
