@@ -19,7 +19,7 @@ import wandb
 logger = logging.getLogger(__name__)
 
 
-@hydra.main(config_path="../conf", config_name="training_config")
+@hydra.main(config_path="../OLD_conf", config_name="training_config")
 def main(cfg):
     # create run
     wandb.init(
