@@ -202,7 +202,7 @@ We added linting checks that every time a new pull request is created. For this 
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented three tests in total. `test_data.py` checks if both the Torch and Huggingface datasets are created properly, including train/test/val splits and tensor shapes for the Torch dataset. It also verifies the dataset length and ensures 'image' and 'text' keys exist in all splits for the Huggingface dataset. `test_model.py` verifies proper model instantiation and checks the model's output shape.
 
 ### Question 8
 
@@ -247,7 +247,8 @@ Because we are multiple people, it was important for us to work on different bra
 >
 > Answer:
 
-We used Google Cloud Storage as our storage for DVC. First we only had raw images of Pokemon. For training our model we had to create captions with BLIP2 for these Pokemon images. The generated captions were saved in a jsonl file. For creating the Huggingface dataset with both images and captions and train/test/val split we had to put the images and the jsonl file with the captions in their respective folder (train/test/val) in the data directory. Having DVC allowed us to experiment with the creation of the dataset. We could move around the images in the folders without destroying the structure of the data. Simply doing `dvc pull` allowed us to reset all the changes we made to the data and try again if something didn't work properly. Additionally having DVC allowed us to include data testing in our workflow since we could use `dvc pull` in our workflow files to get the data for GitHub actions.
+We used Google Cloud Storage for our DVC-based storage. Initially, we only had raw images of Pokémon. To train our model, we generated captions for these images using BLIP2, saving the captions in a JSONL file. For creating a Huggingface dataset with both images and captions, and for the train/test/val split, we placed the images and JSONL captions into their respective train, test, and validation folders in the data directory.
+DVC allowed us to experiment with the dataset creation. We could move the images between folders without disrupting the data structure, and a simple `dvc pull` let us reset any changes and try again if something didn't work properly. Additionally, DVC enabled us to include data testing in our workflow. We could use `dvc pull` in our GitHub Actions workflow files to fetch the data needed for automated tests.
 
 ### Question 11
 
