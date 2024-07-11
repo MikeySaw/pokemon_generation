@@ -26,12 +26,14 @@ def get_parser():
     parser.add_argument("--train", type=bool, default=True, help="Run training")
     parser.add_argument("--test", type=bool, default=True, help="Run testing")
     parser.add_argument("--config_path", type=str, default="conf/ddpm_config.yaml", help="Path to config file")
+    parser.add_argument("--ddp", type=bool, default=False, help="Use DDP for training")
     args = parser.parse_args()
     return args
 
 def main(path: str):
     config = OmegaConf.load(path)
     pl.seed_everything(config.train.seed)
+    args = get_parser()
 
     # Initialize WandB logger
     wandb_logger = WandbLogger(project=config.train.project_name, log_model="all")
@@ -54,19 +56,35 @@ def main(path: str):
         model.load_state_dict(old_state["state_dict"], strict=False)
 
     # Set up trainer
-    trainer = pl.Trainer(
-        max_epochs=config.train.num_epochs,
-        logger=wandb_logger,
-        callbacks=[
-            ModelCheckpoint(every_n_epochs=config.train.save_every, save_top_k=-1),
-            LearningRateMonitor(logging_interval='step')
-        ],
-        accelerator='auto',  # Automatically choose GPU/CPU
-        devices='auto',      # Use all available devices
-        gradient_clip_val=config.train.max_grad_norm,
-        precision=config.train.precision,  # Add this if you want to use mixed precision
-        profiler="simple"
-    )
+    if args.ddp:
+        trainer = pl.Trainer(
+            max_epochs=config.train.num_epochs,
+            logger=wandb_logger,
+            callbacks=[
+                ModelCheckpoint(every_n_epochs=config.train.save_every, save_top_k=-1),
+                LearningRateMonitor(logging_interval='step')
+            ],
+            accelerator='gpu',  # Use DistributedDataParallel
+            devices=2,      # Use all available devices
+            gradient_clip_val=config.train.max_grad_norm,
+            precision=config.train.precision,  # Add this if you want to use mixed precision
+            profiler="simple",
+            strategy="ddp"
+        )
+    else:
+        trainer = pl.Trainer(
+            max_epochs=config.train.num_epochs,
+            logger=wandb_logger,
+            callbacks=[
+                ModelCheckpoint(every_n_epochs=config.train.save_every, save_top_k=-1),
+                LearningRateMonitor(logging_interval='step')
+            ],
+            accelerator='auto',  # Automatically choose GPU/CPU
+            devices='auto',      # Use all available devices
+            gradient_clip_val=config.train.max_grad_norm,
+            precision=config.train.precision,  # Add this if you want to use mixed precision
+            profiler="simple",
+        )
 
     # Train the model
     trainer.fit(model, train_loader)
