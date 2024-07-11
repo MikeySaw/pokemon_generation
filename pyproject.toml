@@ -22,7 +22,7 @@ requires-python = "~=3.11"
 dynamic = ["dependencies"]
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "ldm", "pokemon_stable_diffusion"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
@@ -30,9 +30,11 @@ dependencies = {file = ["requirements.txt"]}
 [tool.ruff]
 line-length = 120
 extend-include = ["*.ipynb"]
+exclude = ["ldm", "pokemon_stable_diffusion", "reports"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
+extend-ignore = ["I001", "E402", "F401"]
 extend-unfixable = ["F401"]
 
 [tool.ruff.lint.isort]

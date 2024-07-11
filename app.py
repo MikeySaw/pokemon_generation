@@ -48,7 +48,7 @@ model = load_model()
 @app.post("/generate")
 async def generate(request: GenerationRequest):
     try:
-        device = next(model.parameters()).device
+        device = next(model.parameters()).device  # noqa
         
         # Generate image
         c = model.get_learned_conditioning([request.prompt])
