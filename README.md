@@ -432,7 +432,7 @@ python pokemon_stable_diffusion/sd_finetune_pl.py
 The `lightning` package has one parameter inside the `Trainer` for `profiler`, simply set it up by `Trainer(profiler="simple", ...)`, this will return the profiling report at the end of the training.
 To train the model with `DDP` strategy, simply add change the `ddp` flag inside the argparse as `True`, this will activate `DDP` training with `2` GPUs activated for training, for data loading, since in all the files the `num_workers` related parameter are setted up with value larger than `1`, we are always using the data distributed loading.
 
-### Model Pruning&Compiling&Quantization 🪄
+### Model Pruning&Compiling&Quantization 🪄 <a href="#top">[Back to Top]</a>
 To get a "smaller" version model with model compiling, simply run the following commands:
 ```shell
 python pruning.py
