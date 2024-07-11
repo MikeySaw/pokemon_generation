@@ -22,7 +22,7 @@ requires-python = "~=3.11"
 dynamic = ["dependencies"]
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "ldm", "pokemon_stable_diffusion"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

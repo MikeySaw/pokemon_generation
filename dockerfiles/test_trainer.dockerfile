@@ -2,15 +2,29 @@
 # The pytorch image needs to be pinned to this version so dvc==3.50.1 can be installed
 FROM nvcr.io/nvidia/pytorch:24.01-py3
 
-RUN apt update && \
-    apt install --no-install-recommends -y build-essential gcc && \
-    apt clean && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y build-essential gcc && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install dvc==3.50.1
-RUN pip install dvc[gs]
+# Set the working directory
+WORKDIR /wd
 
-WORKDIR /
+# Copy the package
+COPY src/ src/
+COPY ldm/ ldm/
+COPY pokemon_stable_diffusion/ pokemon_stable_diffusion/
+COPY requirements.txt requirements.txt
+COPY pyproject.toml pyproject.toml
 
+# Install dependencies
+RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
+# alternative to: RUN pip install -r requirements.txt --no-cache-dir
+
+# Install the package
+RUN pip install . --no-deps --no-cache-dir
+
+# Pull the data from DVC
 RUN mkdir data
 RUN dvc init --no-scm
 COPY .dvc/config .dvc/config
@@ -22,14 +36,7 @@ RUN dvc config core.no_scm true
 
 RUN dvc pull -v
 
-COPY src/  src/
-COPY requirements.txt requirements.txt
-
-RUN pip install -r requirements.txt --no-cache-dir
-
-# the following command will reuse the cache, this will make the installation process faster
-# RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
-
+# Run the test script
 ENTRYPOINT ["python", "-u", "pokemon_generation/modeling/train_example.py", "train"]
 # run the following commands to use the file:
 #    sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
