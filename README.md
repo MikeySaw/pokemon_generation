@@ -9,12 +9,13 @@
 In this project we fine-tune a diffusion model on images of Pokémon. The images are annotated by labels. The goal is to have a deployable model that generates Pokémon given a text prompt.
 
 <a name="top"></a>
+![Finetuned_pokemon.png](assets/sample_1.png)
 
 ## Acknowledgement
 
 Everyone contributed equal and faily during the whole project! 🙌🙌🙌
 
-## Experiment Command Lines Guidance(Experiments Version)
+## Experiment Command Lines Guidance
 
 ### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
 
