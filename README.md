@@ -14,38 +14,6 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 
 Everyone contributed equal and faily during the whole project! 🙌🙌🙌
 
-## In Construction... 🚧🚧🚧
-
-__TL;DR__: please put the things you are doing but havn't finished yet here, so there will be no efforts wasted on repeated stuff. \
-For more general _TO DO_ list, please put them into the __`To Do/Try To Do`__. You can add the things you wanna do but havn't/you think deserve to be done there.
-
-- [ ] Working on train.py and more `pytest` files 👨‍💻
-- [x] Working on github action files 👨‍💻, two added, three more need to be added
-- [ ] Working on `FastAPI` now 👨‍💻
-- [x] Working on _Distributed Training file_ now 👨‍💻
-- [ ] Working on Cloud deployment now 👨‍💻
-- [ ] Working Profiling and corresponding acceleration methods now 👨‍💻
-- [ ] Working on Stable Diffusion fine-tuning file right now 🤗
-- [ ] Working on Stable Diffusion fine-tuning lightning version right now 🤗
-
-<a name="top"></a>
-
-## Crazy Ideas 🔥🔥🔥
-
-__TL;DR__: put the things you felt like are more detailed than a general _To Do_ but havn't started yet here: \
-
-- [ ] Create a slower version of inference deliberately, play with the `profiler` than make it faster later 💃💃💃, also play with slower/memory bad behavior first (use `.to(device) instead of (device=device), etc.)
-- [ ] Create a `Model Zoo` section like the `latent diffusion` repo and put the pretrained weights into this section, we can either put the pretrained weights into a `Google Drive` folder or just use `dvc` to pull the weights and write down the command to `cd` to the path of the pretrained weights.
-
-## To Do/Try to do
-
-Some tests will be done in the coming weeks, right now what we need to change inside the things we already have done would be:
-
-- [ ] Check/Fix the paths inside different test files.
-- [x] Get a more easier to test model to replace the one inside the `, the SD model right now requires huge GPU RAM to test
-- [x] Test again some core parts of the project list: For example replace the hydra folder by using the real hyperparameters,
-- [ ] Change the Stable Diffusion finetuning .py yaml file into a correct one, right now it is just a placeholder.
-
 ## Experiment Command Lines Guidance(Experiments Version)
 
 ### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
@@ -53,22 +21,22 @@ Some tests will be done in the coming weeks, right now what we need to change in
 Before start to `git add` anything related to this repo, please make sure you run the following commands! 😱😱😱
 
 ```shell
-# Get the newest version of the repo！😱
+# Get the newest version of the repo！
 git pull origin main
 
-# install the newest version dependencies!😱
-pip install -r requirements.txt
+# install the newest version dependencies!
+pip install -r real_requirements.txt
 
-# run the pre-commit hook to check/modify your file you wanna push!😱 
+# run the pre-commit hook to check/modify your file you wanna push!
 pip install pre-commit 
 
-# Alert!!!💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
+# Alert!!!💥 The following line will check every files in the repo based on the pre-commit hook!
 pre-commit run --all-files
 
-# Only want to check one file? 😱 Use this command instead!
+# Only want to check one file?  Use this command instead!
 pre-commit run --files YOUR_FILE_NAME
 
-# Then do the normal procedure 💯💯💯
+# Then do the normal procedure 💯
 # git add / git commit / git push ...
 ```
 
@@ -107,6 +75,8 @@ chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
 
+
+### Data Version Control ⚙️<a href="#top">[Back to Top]</a>
 If you want to generate captions for your own images, put them in `data/raw/` and run `src/data/add_data_description.py` \
 To get the images and captions in `data/interim/train/`, `data/interim/test/` and `data/interim/val/` run: `src/data/create_data_splits.py` \
 To generate a torch dataset run: `src/data/make_dataset.py` \
@@ -117,9 +87,7 @@ dataset = pokemon_huggingface()
 ```
 Keep in mind that this requires that you have done the previous steps!
 
-### Data Version Control Test <a href="#top">[Back to Top]</a>
-
-run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
+run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. This will avoid version conflict problems during the dockerfile building phase. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 
 ```shell
 # Ignore the first line if you have not installed dvc yet
@@ -133,7 +101,7 @@ dvc pull
 
 ### Hydra Test <a href="#top">[Back to Top]</a>
 
-please check the `src/config` folder for different hyperparameter settings, ~~right now the files inside the folder are all __placeholder__, which means that the real config conresponding values are not fitted inside the folder yet,~~ We started to add the real hyperparameters into the repo, to add your own experiment hyperparameters, simply add another `yaml` file inside the `src/config/experiments` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
+please check the `config/` folder for different hyperparameter settings, to add your own experiment hyperparameters, simply add another `yaml` file inside the `config/` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 
 ```shell
 # @package _global_
@@ -156,17 +124,18 @@ The structure of this folder should always looks similar to this one:
     └── train_2.yaml
 ```
 
-__Update__: We are adding more files into the `config` folder, this means that we are having more folders inside the `config` folder now compared to before, this would be nice for us since we can change the config settings during the _training/sampling_ in command line, it would be something like:
+We can change the config settings during the _training/sampling_ in command line, it would be something like this:
 
 ```shell
 python train.py optimizer=sgd
 ```
 
-### Github Actions <a href="#top">[Back to Top]</a>
+### Github Actions & Continuous Integration & Docker Build Workflow <a href="#top">[Back to Top]</a>
 
 For github actions related file, please check the `.github/workflows`, this folder includes all the github actions which will be trigged when we push/pull into our repo, to be more specific about those files, here is a brief introduction about what those files are doing: \
 the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
 the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo.
+When pull/merge to the github repo, the Google Cloud will automatically trigger the docker image build workflow, the `cloudbuild.yaml` dockerfile will build a dockerfile for testing `dvc pull` command for getting the data.
 
 #### Pre-Commit Hook <a href="#top">[Back to Top]</a>
 
@@ -188,6 +157,15 @@ Wanna add your own `pytest` check into the repo? Easy! Simply add a `.py` file i
 def test_...(*args, **kwargs):
     ...
 ```
+
+### Coverage <a href="#top">[Back to Top]</a>
+To calculate the coverage rate of all the `pytest` related tests, simply run the following commands:
+```shell
+coverage run -m pytest tests/
+
+# check the coverage report!
+coverage report
+``` 
 
 ### Dockerfile Test🐋<a href="#top">[Back to Top]</a>
 
@@ -216,7 +194,6 @@ For `MAC A1/A2` chip user, you may consider to use this command if you want to d
 ```shell
 docker build --platform linux/amd64 -f sd_finetune.dockerfile . -t fd_train:latest
 ```
-
 
 To build the data test dockerfile to test if `dvc` is working correctly, simply run the following codes:
 ```shell
@@ -330,7 +307,7 @@ nvidia-smi
 Now we have everything prepared already, this would be exactly the same as deploying a model on our own server, simply follow the `Train Model` section in this README.md file, happy coding!😊
 
 
-#### Vertex AI training command! 🌩️ <a href="#top">[Back to Top]</a>
+#### Vertex AI training command! 🌩️ 
 We have to use _Vertex AI_ if there is no computation resources available at the moment. \
 we define our training config file in `job_config.yaml`, then we will build and push the training docker image into the `Artifact Registry`:
 ```shell
@@ -355,6 +332,11 @@ Feel angry about why the generated images does not look like a pokemon? 😡 Try
 python finetune_app.py
 ```
 Simply do the same thing as before, then download the generated image, have fun with this pokemon app!🐻
+
+If you want to check the monitoring of the deployed application, simply go to this link:
+```shell
+http://localhost:8080/metrics
+```
 
 ### Serve Model Locally <a href="#top">[Back to Top]</a>
 To serve our latent diffusion model locally, simply run the following commands!
@@ -431,7 +413,7 @@ The terminal should then return a message like this:
 Deploying container to Cloud Run service [YOUR_SERVICE_NAME] in project [YOUR_PROJ_ID] region [LOCATION]
 ```
 
-#### Model Deployment Debug Guidance👩‍🔧
+#### Model Deployment Debug Guidance👩‍🔧 
 A user may always used `sudo` command before every commands used before without encountering an issue, however, this will cause severe authorization issues if you try to push your image into your _Artifact Registry_, you will always encounter authorize issues when you pusn the images:
 ```shell
 denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/my-project/locations/LOCATION/repositories/my-repo"
@@ -444,56 +426,40 @@ sudo usermod -aG docker $USER
 Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
 After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
-### Data Shifting Check
+### Data Shifting Check <a href="#top">[Back to Top]</a>
 To check the model robustness torwards data drifting during the image generation, simply run the following commands:
 ```shell
 python data_drifting
 google-chrome image_drift_report.html
 ```
 
-### Model Building and Multi-GPUs training with Diffusers and Huggingface
-
-To train a diffusion model with Multi-GPUs and algorithm like `LoRA`, please run the following commands:
-
+### Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading 🏎️ <a href="#top">[Back to Top]</a>
+To train the model by using the `lighting` package,  simply run the following command:
 ```shell
-pip install accelerate
-pip install git+https://github.com/huggingface/diffusers
-# Instead you can install by using pip install -r requirements.txt
-
-# Initialize the config for the accelerate
-accelerate config
-
-# Train the model by using the following script
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
-export OUTPUT_DIR="models/finetune/lora"
-export HUB_MODEL_ID="pokemon-lora"
-export DATASET_NAME="data/raw"
-
-accelerate launch --mixed_precision="fp16"  notebooks/train_text_to_image_lora.py \
---pretrained_model_name_or_path=$MODEL_NAME \
---dataset_name=$DATASET_NAME \
---dataloader_num_workers=8 \
---resolution=224 \
---center_crop \
---random_flip \
---train_batch_size=1 \
---gradient_accumulation_steps=4 \
---max_train_steps=15000 \
---learning_rate=1e-04 \
---max_grad_norm=1 \
---lr_scheduler="cosine" \
---lr_warmup_steps=0 \
---output_dir=${OUTPUT_DIR} \
---push_to_hub \
---hub_model_id=${HUB_MODEL_ID} \
---report_to=wandb \
---checkpointing_steps=500 \
---validation_prompt="A naruto with blue eyes." \
---multi_gpu 2 \
---seed=42
+python pokemon_stable_diffusion/sd_finetune_pl.py
 ```
+The `lightning` package has one parameter inside the `Trainer` for `profiler`, simply set it up by `Trainer(profiler="simple", ...)`, this will return the profiling report at the end of the training.
+To train the model with `DDP` strategy, simply add change the `ddp` flag inside the argparse as `True`, this will activate `DDP` training with `2` GPUs activated for training, for data loading, since in all the files the `num_workers` related parameter are setted up with value larger than `1`, we are always using the data distributed loading.
 
-Our trainining would be done on two `A6000` GPUs with 40GB RAM for each of them.
+### Model Pruning&Compiling&Quantization
+To get a "smaller" version model with model compiling, simply run the following commands:
+```shell
+python pruning.py
+```
+Since `pytorch` entered `2.0` era, you can accelerate your model training/inference time by simply calling one line of code:
+```shell
+torch.compile(model)
+```
+This works like a free gift and will accelerate the speed by 20 to 30 percent.
+For Quantization, simply add this trick to your code:
+```shell
+    # run faster
+    tf32 = True
+    torch.backends.cudnn.allow_tf32 = bool(tf32)
+    torch.backends.cuda.matmul.allow_tf32 = bool(tf32)
+    torch.set_float32_matmul_precision('high' if tf32 else 'highest')
+```
+This could accelerate your training/inference speed up to 50 percent.
 
 ### Run model training locally <a href="#top">[Back to Top]</a>
 
@@ -552,7 +518,3 @@ docker system prune -af
 ```
 
 TODO: add a "make clean" command to the Makefile
-
-### Dataset Structure <a href="#top">[Back to Top]</a>
-
-Right now the `data` folder is not uploaded to 🤗 Datasets, we may consider to upload this folder to the 🤗 Datasets if we use a dataset with JSON file as meta info at the end of this project.
