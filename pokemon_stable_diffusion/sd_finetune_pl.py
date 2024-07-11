@@ -36,7 +36,7 @@ def main(path: str):
     args = get_parser()
 
     # Initialize WandB logger
-    wandb_logger = WandbLogger(project=config.train.project_name, log_model="all")
+    wandb_logger =  WandbLogger(project=config.train.project_name, log_model="all")
     wandb_logger.experiment.config.update(OmegaConf.to_container(config, resolve=True)) # correct, noqa
 
     # Prepare data

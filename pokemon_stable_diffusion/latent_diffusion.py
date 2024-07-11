@@ -29,7 +29,6 @@ from PIL import Image
 from omegaconf import OmegaConf, ListConfig
 
 from ldm.utils import log_txt_as_img, default, ismap, isimage, instantiate_from_config
-from ldm.modules.ema import EMA
 from ldm.modules.diffusionmodules.util import noise_like
 from ldm.modules.distributions.distributions import DiagonalGaussianDistribution
 from ldm.models.autoencoder import VQModelInterface, IdentityFirstStage, AutoencoderKL

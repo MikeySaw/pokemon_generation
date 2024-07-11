@@ -48,7 +48,7 @@ Some tests will be done in the coming weeks, right now what we need to change in
 
 ## Experiment Command Lines Guidance(Experiments Version)
 
-### Starting Point Alarm! 🚨🚨🚨 <a href="#top">[Back to Top]</a>
+### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
 
 Before start to `git add` anything related to this repo, please make sure you run the following commands! 😱😱😱
 
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 # run the pre-commit hook to check/modify your file you wanna push!😱 
 pip install pre-commit 
 
-# Alert!!!💥💥💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
+# Alert!!!💥 The following line will check every files in the repo based on the pre-commit hook!💥💥💥
 pre-commit run --all-files
 
 # Only want to check one file? 😱 Use this command instead!
@@ -82,7 +82,7 @@ cd src/modeling/
 python train_ddpm_example.py
 ```
 
-Alert!!!🚨🚨🚨 You must have a very nice GPU if you want to run the training commands!
+Alert!!!🚨 You must have a very nice GPU if you want to run the training commands!
 
 ### Test Stable Diffusion Model with a dummy input
 
@@ -96,7 +96,7 @@ This will run the `dummy training` process based on a `dummy image` and a `dummy
 You will see the generated images `sample_0.png`, if the code is executed correctly.
 __Alert!You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
 
-### Data Download Part 🚚🚚🚚 <a href="#top">[Back to Top]</a>
+### Data Download Part 🚚 <a href="#top">[Back to Top]</a>
 
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
@@ -106,6 +106,16 @@ run the following commands in command line to download zipped images from kaggle
 chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
+
+If you want to generate captions for your own images, put them in `data/raw/` and run `src/data/add_data_description.py` \
+To get the images and captions in `data/interim/train/`, `data/interim/test/` and `data/interim/val/` run: `src/data/create_data_splits.py` \
+To generate a torch dataset run: `src/data/make_dataset.py` \
+If you want a huggingface dataset write the following into your script:
+```shell
+from src.data.make_dataset import pokemon_huggingface
+dataset = pokemon_huggingface()
+```
+Keep in mind that this requires that you have done the previous steps!
 
 ### Data Version Control Test <a href="#top">[Back to Top]</a>
 
@@ -158,7 +168,7 @@ For github actions related file, please check the `.github/workflows`, this fold
 the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
 the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo.
 
-#### Pre-Commit Hook
+#### Pre-Commit Hook <a href="#top">[Back to Top]</a>
 
 To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
@@ -179,7 +189,7 @@ def test_...(*args, **kwargs):
     ...
 ```
 
-### Dockerfile Test <a href="#top">[Back to Top]</a>
+### Dockerfile Test🐋<a href="#top">[Back to Top]</a>
 
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile.
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
@@ -194,6 +204,252 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 ```
 
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
+
+### Dockerfile Building Up commmands🐳 <a href="#top">[Back to Top]</a>
+To build the training dockerfile, please run the following commands:
+```shell
+# If you encounter issues, consider use `sudo` before the whole command
+docker build -f sd_finetune.dockerfile . -t fd_train:latest
+```
+
+For `MAC A1/A2` chip user, you may consider to use this command if you want to deploy the model on cloud later:
+```shell
+docker build --platform linux/amd64 -f sd_finetune.dockerfile . -t fd_train:latest
+```
+
+
+To build the data test dockerfile to test if `dvc` is working correctly, simply run the following codes:
+```shell
+# If you encounter issues, consider use `sudo` before the whole command
+docker build -f dvcdata.dockerfile . -t fd_data:latest
+```
+
+To build upon `app.py` and deploy your lovely model on _Google Cloud_ later, simply run the following commands:
+```shell
+docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+```
+
+To run the training dockerfile you just build, simply run the following commands: \
+__Alert! 🚨The following dockerfile includes GPU training support, automatical dvc data preparation, and Wandb logging, please make sure you have all the env prepared!__
+__Alert! 🚨The Stable Diffusion fine-tuning needs at least 18 GB RAM GPU to run, use server or consider rent a GPU if you want to run the following dockerfile__
+```shell
+docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY fd_train:latest
+```
+Please replace the `YOUR_WANDB_KEY` with your own `wandb` authorization token, to get your own token, simply click the following link: [wandb authorization link](db.ai/authorize), then login and copy paste your own authorization token.
+Please do not forget the `--gpus all` flags, this will automatically🪄activate your _NVIDIA GPU_ if your machine has one. Enjoy the fast training! 🏄‍♀️
+
+#### Docker Debug Guidance🧑🏿‍🔧
+Before you start to build another (large!) dockerfile, you may consider to check which dockerfile you already have:
+```shell
+docker images
+```
+If you find out you accidently built a dockerfile you do not need anymore, run the following command to delete the dockerfile
+```shell
+docker rmi IMAGE_ID
+```
+If you encounter issues with deleting the dockerfiles, copy paste the sequence of numbers at the end of your error message, then try the following two commands:
+```shell
+docker rm numbers
+# or
+docker rmi numbers
+# then try to delete the docker images again
+docker rmi IMAGE_ID
+```
+
+If `--gpus all` flag returns an error with GPU support, you may need to check the following commands:
+```shell
+# check if the nvidia-driver is installed 
+# go to their website and download the driver if you do not have one already
+nvidia-smi
+
+# check if the compiler is correct/cuda tookit is available
+nvcc --version
+# you may need sudo rights if nvcc command is not recognized by your machine
+# sudo apt install nvidia-cuda-toolkit
+```
+
+If the commands before did not solve the error you are encountering, you may need an extra tookit for your dockerfile to run with a GPU support;
+```shell
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+After running those commands, your dockerfile should now work with GPU support very smoothly!🏎️
+
+### Cloud Training commands☁️ <a href="#top">[Back to Top]</a>
+To start the cloud training in _GCloud Compute Engine_ with _Nvidia GPU_ support, simply run the following commands to check the available GPUs in different ZONE first:
+```shell
+gcloud compute accelerator-types list
+```
+Since we are not going to train the whole model on _GCloud Compute Engine_ engine, we do not need anything more advanced than _Nvidia T4_, also, it is really hard and expensive to get any GPU besides the _T4_.
+Try to run the following command to see if we could successfully create a compute engine with GPU support:
+```shell
+gcloud compute instances create adios1 \
+--zone="asia-northeast3-c" \
+--image-family="pytorch-latest-gpu" \
+--image-project=deeplearning-platform-release \
+--accelerator="type=nvidia-tesla-t4,count=1" \
+--maintenance-policy TERMINATE 
+```
+When you successfully created an instance, _ssh_ to the instance to launch your training.
+```shell
+# check the compute instances we created already 
+gcloud compute instances list
+
+# ssh to the one with GPU support
+gcloud beta compute ssh <instance-name>
+```
+
+If there is no enough computation resources for _Compute Engine_, you will receive an error message like this:
+```shell
+message: The zone 'projects/PROJ_ID/zones/ZONE' does not
+  have enough resources available to fulfill the request.  Try a different zone, or
+  try again later.
+```
+Luckily, we got a GPU from `asia-northeast3-c`, let's `ssh` to the server and have fun there!
+
+To ssh to the server, simply run the following commands:
+```shell
+gcloud compute ssh --zone "asia-northeast3-c" "adios1" --project "lovely-aurora-423308-i7"
+```
+Next, since we are going to train our model on the Google Cloud, please run the following command to install a pre-defined docker image:
+```shell
+# check all the deep learning related pre-defined docker images
+gcloud container images list --repository="gcr.io/deeplearning-platform-release"
+
+# check the lovely pytorch with GPU support!
+python -c "import torch; print(torch.__version__)"
+
+# check the lovely nvidia-driver we have!
+nvidia-smi
+```
+Now we have everything prepared already, this would be exactly the same as deploying a model on our own server, simply follow the `Train Model` section in this README.md file, happy coding!😊
+
+
+#### Vertex AI training command! 🌩️ <a href="#top">[Back to Top]</a>
+We have to use _Vertex AI_ if there is no computation resources available at the moment. \
+we define our training config file in `job_config.yaml`, then we will build and push the training docker image into the `Artifact Registry`:
+```shell
+gcloud ai custom-jobs create \
+  --region=us-central1 \
+  --display-name=pokemon-training-job \
+  --config=job_config.yaml
+```
+
+### Deploy Model Via FastAPI <a href="#top">[Back to Top]</a>
+Wanna see an image which should be a pokemon but does not looks like a pokemon at all? 👀 Simply run the following commands!
+```shell
+# Deploy the model locally via FastAPI!
+python app.py
+```
+You will see from the terminal that our application is already there!
+To generate one image based on your prompt, simply go to this link from your browser: `http://localhost:8080/docs `, click the `try it out` button, the replace the `str` into a real prompt, it will generate a pokemon image for you!
+
+Feel angry about why the generated images does not look like a pokemon? 😡 Try the finetuned version! Simply run the following commands to deploy a fine-tuned stable diffusion model locally for your lovely pokemon!
+```shell
+# Deploy a fine-tuned model!
+python finetune_app.py
+```
+Simply do the same thing as before, then download the generated image, have fun with this pokemon app!🐻
+
+### Serve Model Locally <a href="#top">[Back to Top]</a>
+To serve our latent diffusion model locally, simply run the following commands!
+```shell
+torch-model-archiver --model-name latent_diffusion   \
+--version 1.0  \
+--model-file pokemon_stable_diffusion/latent_diffusion.py  \
+--handler latent_diffusion_handler.py  \
+--extra-files "conf/ddpm_config.yaml,sd-v1-4-full-ema.ckpt"  \
+--requirements-file real_requirements.txt
+```
+Now we have a `latent_diffusion.mar` file, which can be served with `torchserve` package, run the following commands to make it work! 🈺
+```shell
+torchserve --start --ncs --model-store localserve --models latent_diffusion.mar --ts-config config.properties
+```
+We also offer you a _one-step solution_ for using this `torchserve` model, simply run this file and have fun!
+```shell
+python torchserverun.py
+```
+
+### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a>
+To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
+Run the following command to enable the _Cloud Run_ service via command line:
+```shell
+gcloud services enable run.googleapis.com
+``` 
+You can actually do everything via command line without going to the _Cloud Console_, command line is all you need!💯
+To build an _Artifact Registry_ then use it for Cloud Deployment, simply run with:
+```shell
+gcloud artifacts repositories create CUSTOM_NAME --repository-format=docker --location=LOCATION --description="DESCRIPTION"
+```
+You need to authorize before you start to build and push your cloud deployment dockerfile:
+```shell
+gcloud auth login
+gcloud auth configure-docker
+gcloud auth configure-docker LOCATION.docker.pkg.dev
+
+# verify you are in the correct project
+gcloud config set project YOUR_PROJ_ID
+
+# If you havn't build the dockerfile you want to deploy, run the following commands:
+docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+
+# In our case: docker tag gcp_test_app us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app
+docker tag gcp_test_app LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
+
+# To push the docker image to your Artifact Registry, run this command
+# In our case: docker push us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app
+docker push LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
+```
+After you successfully pushed your images already, run the following commands in terminal to deploy your model on _Cloud Run_
+```shell
+gcloud run deploy YOUR_SERVICE_NAME   \
+--image LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app   \
+--platform managed   \
+--region us-central1   \
+--allow-unauthenticated   \
+--memory 32Gi   \
+--cpu 8 \
+``` 
+In our case, this command would be:
+```shell
+gcloud run deploy latent-diffusion-service   \
+--image us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app   \
+--platform managed   \
+--region us-central1   \
+--allow-unauthenticated   \
+--memory 32Gi   \
+--cpu 8 
+```
+
+The terminal should then return a message like this:
+```shell
+Deploying container to Cloud Run service [YOUR_SERVICE_NAME] in project [YOUR_PROJ_ID] region [LOCATION]
+```
+
+#### Model Deployment Debug Guidance👩‍🔧
+A user may always used `sudo` command before every commands used before without encountering an issue, however, this will cause severe authorization issues if you try to push your image into your _Artifact Registry_, you will always encounter authorize issues when you pusn the images:
+```shell
+denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/my-project/locations/LOCATION/repositories/my-repo"
+```
+To solve this issue, the following two steps may needed, please run both of them, then login and logout from your PC to make it work.
+To avoid using the `sudo` again for anything related to docker, please run the following command:
+```shell
+sudo usermod -aG docker $USER
+```
+Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
+After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
+
+### Data Shifting Check
+To check the model robustness torwards data drifting during the image generation, simply run the following commands:
+```shell
+python data_drifting
+google-chrome image_drift_report.html
+```
 
 ### Model Building and Multi-GPUs training with Diffusers and Huggingface
 

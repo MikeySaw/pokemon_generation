@@ -37,9 +37,19 @@ datasets
 diffusers
 kornia==0.6
 
+fastapi
+uvicorn
+
+nvgpu
+
+torchserve
+torch-model-archiver
+torch-workflow-archiver
 
 # the following libraries are required to push the huggingface dataset to the hub
 huggingface_hub
 
 -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
 -e git+https://github.com/openai/CLIP.git@main#egg=clip
+
+prometheus-fastapi-instrumentator
