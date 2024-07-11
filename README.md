@@ -39,10 +39,24 @@ pre-commit run --files YOUR_FILE_NAME
 # Then do the normal procedure 💯
 # git add / git commit / git push ...
 ```
-
-### Finetune a Stable Diffusion 🔥
+## Model Training 🌋 <a href="#top">[Back to Top]</a> 
+_TL, DR. I just want to train my model!_ 🤘
+### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a>
 To finetune a Stable Diffusion Model simply run the following commands:
 ```shell
+# Get the repo!
+git clone https://github.com/MikeySaw/pokemon_generation/
+cd pokemon_generation/
+
+# Get the env!
+conda create -n pokemon python==3.11
+conda activte pokemon
+pip install -r real_requirements.txt
+
+# Get the data!
+dvc pull
+
+# Train the model!
 python pokemon_stable_diffusion/sd_finetune.py
 ```
 To train a `DDPM` model from scratch(Backbone of our SD), simply run the following commands.
@@ -53,7 +67,7 @@ python train_ddpm_example.py
 
 __Alert!!!🚨 You must have a very nice GPU if you want to run the training commands!__
 
-### Test Stable Diffusion Model with a dummy input
+### Test Stable Diffusion Model with a dummy input <a href="#top">[Back to Top]</a>
 
 To test Stable Diffusion Model with a dummy input (already prepared for you!), simply run the following commands:
 
@@ -64,6 +78,8 @@ python pokemon_stable_diffusion/latent_diffusion.py
 This will run the `dummy training` process based on a `dummy image` and a `dummy txt`. \
 You will see the generated images `sample_0.png`, if the code is executed correctly.
 __Alert!🚨 You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
+
+## Model Preparation 🛸
 
 ### Data Download Part 🚚 <a href="#top">[Back to Top]</a>
 
