@@ -44,7 +44,7 @@ nvgpu
 
 torchserve
 torch-model-archiver
-torh-workflow-archiver
+torch-workflow-archiver
 
 # the following libraries are required to push the huggingface dataset to the hub
 huggingface_hub
