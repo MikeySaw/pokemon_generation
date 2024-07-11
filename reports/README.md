@@ -150,7 +150,7 @@ For experiment tracking and logging, we relied on **Weights and Biases (Wandb)**
 
 **Data Version Control (DVC)** was used for managing data versions and synchronizing between local and remote storage. For version control of our code, we used **Git** in combination with **GitHub**, facilitating collaboration among multiple developers. **Pytest** was employed to write unit tests, ensuring new changes did not break the codebase.
 
-**Linting** tools such as **Pylint** and **Flake8** helped maintain a consistent coding style. **GitHub Actions** automated our continuous integration processes, running tests and checks upon each commit. **Cloud Build** automated the building and pushing of Docker images to our **Artifact Registry**, making deployment more efficient.
+The highly personalizable **Ruff** linter and formatter forced us to conform to a consistent coding style. **GitHub Actions** automated our continuous integration processes, running tests and checks upon each commit. **Cloud Build** automated the building and pushing of Docker images to our **Artifact Registry**, making deployment more efficient.
 
 For deployment, **FastAPI** was used to create REST APIs, and **Cloud Run** enabled us to deploy these APIs in a serverless manner. **Cloud Storage** provided scalable storage for our data and models, and **Compute Engine** offered the necessary compute power. For scalable and easy model training, we used **Vertex AI**. **Cloud Monitoring** helped us track logs and errors from our cloud services.
 
@@ -171,7 +171,7 @@ For deployment, **FastAPI** was used to create REST APIs, and **Cloud Run** enab
 >
 > Answer:
 
-Our project repository comes as an installable python package. Using setuptools, we configured our project to read the package dependencies with their required versions from the requirements.txt file when it is installed. Specifying the version numbers of the packages was important because we encountered bugs with newer versions of some packages, such as dvc. In the pyproject.toml, we also specified the required python version, which is checked by setuptools upon installing the package. A new group member would just have to install a compatible python version and then the package before they could also work on the project.
+Subfolders of our project come as python packages and are installable with the use of setuptools. The package dependencies we used, along with their required versions, can be read from the requirements.txt file and easily installed locally. Specifying the version numbers of the packages was important because we encountered bugs with newer versions of some packages, such as dvc. In the pyproject.toml, we also specified the required python version, which is checked by setuptools upon installing the package. A new group member would just have to install a compatible python version and then the package, which in turn installs all necessary dependencies, before they could also work on the project.
 
 ### Question 5
 
@@ -186,7 +186,7 @@ Our project repository comes as an installable python package. Using setuptools,
 > *experiments.*
 > Answer:
 
-We decided to use the new version of the Cookiecutter Data Science template (version 2.0) as we deemed it to have a clearer structure than the previous version. We however did not use every folder that came with the template, some like the refs and we removed those from the tree. Most notably, we needed to remove the data folder, because we used dvc for version control that is decoupled from git. We also added some small folders e.g. for collecting logging data from pytorch lightning or hydra.
+We decided to use the new version of the Cookiecutter Data Science template (version 2.0) as we deemed it to have a clearer structure than the previous version. We however did not strictly adhere to the default structure of the template, instead we removed some folders and files that we deemed unnecessary. Most notably, we needed to remove the data folder because we used DVC for version control of our dataset. We also added some folders, such as a folder containing most of the functionality needed for our model.
 
 ### Question 6
 
@@ -197,7 +197,7 @@ We decided to use the new version of the Cookiecutter Data Science template (ver
 >
 > Answer:
 
-We added linting checks that every time a new pull request is created. For this purpose we used the ruff linter. We also used ruff to format our code as it comes with a formatter as well. To configure ruff globally for our team, we added the linting and formatting rules to the pyproject.toml file.
+We added linting checks that are triggered every time a new pull request is created. For this purpose we used the ruff linter. We also used the ruff package to format our code as it includes a formatter. To configure ruff globally for our team, we added the linting and formatting rules to the pyproject.toml file.
 
 ## Version control
 
@@ -239,7 +239,7 @@ We implemented seven tests in total.
 >
 > Answer:
 
-Our current code coverage for this course project is 31%. While this shows that a portion of our code is covered by tests, it's important to consider the context of a course project. In educational settings, the emphasis is often on learning and understanding concepts rather than achieving high production-level metrics like code coverage.
+Our current code coverage for this course project is 31%. While this shows that a portion of our code is covered by tests, it is important to consider the context of a course project. In educational settings, the emphasis is often on learning and understanding concepts rather than achieving high production-level metrics like code coverage.
 
 Nevertheless, striving to increase our coverage beyond 31% would still be beneficial. It allows us to practice writing more comprehensive tests, which can help in identifying and fixing potential issues earlier in the development process. This approach not only improves our understanding of testing methodologies but also contributes to producing more reliable and robust software, which is valuable even in a course project context.
 
@@ -699,7 +699,7 @@ This project was a collaborative effort, with each team member contributing to d
 
 - Student 12672582 was in charge of the modeling, led the efforts in training the models in the cloud and optimizing the performance of our machine learning models. They worked extensively with Google Cloud Platform and handled the deployment of the models, ensuring scalability and efficiency. They contributed significantly to the readme file, set up many configuration files, developing the Docker containers for training and deploying our applications. They also contributed to debugging and resolving complex issues. Contributed to this document as well. They also integrated Hydra for configuration management.
 - Student 1215036 focused on the data pipeline, managing data downloading, preprocessing, and version control using DVC. They also handled the integration of data into the training process, ensuring that the datasets were correctly formatted and accessible. Helped with setting up the structure of the repository. Contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks. They also contributed to debugging and resolving complex issues. Contributed to this document as well. 
-- Student 12285004 was responsible for setting up the initial cookie cutter project structure. They ensured that the development environment was standardized and reproducible. Developed configuration files, contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks quality checks using pytest. Contributed to this document as well. 
+- Student 12285004 was responsible for setting up the initial project, including repository creation, cookie cutter project structure and setting up a WandB team. They ensured that the development environment was standardized and reproducible. Developed configuration files, contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks quality checks using pytest. Contributed to this document as well. 
 - Student 12691013 was responsible for the experiment running on wandb. Contributed to quality checks quality checks using pytest. Contributed to this document as well. 
 
-All members contributed to the coding, testing, and documentation processes, ensuring a cohesive and well-documented project.
+All members contributed to the coding, testing, and documentation processes, ensuring a cohesive and well-documented project. We communicated at every step of the way, in a WhatsApp group and in regular in-person meetings, to stay informed on what other group members were working on, and enable smooth project development by never losing track of our goal. In this way, we also avoided conficts and split the roles of the team.
