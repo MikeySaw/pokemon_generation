@@ -1,0 +1,22 @@
+# add train and test config into this file
+batch_size: 1
+num_workers: 16
+gradient_accumulate_every: 1
+num_epochs: 50
+log_every: 100
+save_every: 10
+max_grad_norm: 0.0
+json_file_path: "metadata.jsonl"
+log_dir: "logs"
+checkpoint_dir: "checkpoints"
+resume: "checkpoints/last.ckpt"
+resume_optimizer: true
+resume_lr_scheduler: true
+pin_memory: true
+device : "cuda"
+model: LatentDiffusionModel
+seed: 42
+img_dir: "data/interim/train"
+learning_rate: 1.0e-04
+weight_decay: 0.0
+min_lr: 1.0e-06
