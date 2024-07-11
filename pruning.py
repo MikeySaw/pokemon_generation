@@ -42,7 +42,7 @@ def measure_time(model, batch_size, device):
     with torch.no_grad():
         dummy_images = torch.randn(batch_size, 3, 256, 256, device=device)
         encoder_posterior = model.encode_first_stage(dummy_images)
-        z = model.get_first_stage_encoding(encoder_posterior).detach()
+        z = model.get_first_stage_encoding(encoder_posterior).detach()  # noqa
 
     model.train()
     _, _ = model.train_step({"image": dummy_images, "txt": dummy_captions}, c=c)
