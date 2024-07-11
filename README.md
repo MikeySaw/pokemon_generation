@@ -364,7 +364,7 @@ torch-model-archiver --model-name latent_diffusion   \
 --model-file pokemon_stable_diffusion/latent_diffusion.py  \
 --handler latent_diffusion_handler.py  \
 --extra-files "conf/ddpm_config.yaml,sd-v1-4-full-ema.ckpt"  \
---requirements-file real_requirements.txt
+--requirements-file requirements.txt
 ```
 Now we have a `latent_diffusion.mar` file, which can be served with `torchserve` package, run the following commands to make it work! 🈺
 ```shell

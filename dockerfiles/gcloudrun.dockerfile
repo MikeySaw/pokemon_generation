@@ -13,11 +13,11 @@ WORKDIR /app
 COPY conf/ /app/conf/
 COPY ldm/ /app/ldm/
 COPY pokemon_stable_diffusion/ /app/pokemon_stable_diffusion/
-COPY real_requirements.txt /app/real_requirements.txt
+COPY requirements.txt /app/requirements.txt
 COPY sd-v1-4-full-ema.ckpt /app/sd-v1-4-full-ema.ckpt
 
 # Install Python dependencies
-RUN pip install -r real_requirements.txt --no-cache-dir
+RUN pip install -r requirements.txt --no-cache-dir
 RUN pip install fastapi uvicorn
 
 # Copy the FastAPI app
