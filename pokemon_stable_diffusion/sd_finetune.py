@@ -12,47 +12,44 @@ https://github.com/CompVis/latent-diffusion
 # Import monitor libraries
 
 # add relative path to import the modules
-import sys
-import os
-
-# Get the current directory
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Get the parental directory, which should include both folders
-project_root = os.path.dirname(current_dir)
-
-# Add the path into the system path
-sys.path.append(project_root)
-
-import json
-import random
-import os
-import wandb 
-from tqdm import tqdm
 import argparse
+import json
+import os
+import random
+import sys
 import time
-
-# Import training libraries
-import numpy as np
-from PIL import Image
-import torch
-from torch.utils.data import DataLoader, Dataset, random_split
-from torch.optim.lr_scheduler import CosineAnnealingLR
-import torchvision
-from torchvision import transforms
-from omegaconf import OmegaConf
-
-# Import Model Libraries
-# from models.ldm.data.base import Txt2ImgIterableBaseDataset
-from ldm.utils import instantiate_from_config
-from latent_diffusion import LatentDiffusion # noqa
-from ldm.models.autoencoder import AutoencoderKL #noqa
-from ldm.modules.encoders.modules import FrozenCLIPEmbedder
 
 # Import the formatting libraries
 from typing import Optional
 
-def seed_everything(config:OmegaConf):
+from latent_diffusion import LatentDiffusion  # noqa
+
+# Import training libraries
+import numpy as np
+from omegaconf import OmegaConf
+from PIL import Image
+import torch
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.utils.data import DataLoader, Dataset, random_split  # TODO: imported but unused
+import torchvision
+from torchvision import transforms
+from tqdm import tqdm
+
+from ldm.models.autoencoder import AutoencoderKL  # noqa
+from ldm.modules.encoders.modules import FrozenCLIPEmbedder
+
+# Import Model Libraries
+# from models.ldm.data.base import Txt2ImgIterableBaseDataset
+from ldm.utils import instantiate_from_config  # TODO: imported but unused
+import wandb
+
+# Add the working directory to the python file search path
+# Docker does not do this automatically
+# This file has to be run from the parent directory of pokemon_stable_diffusion/ (the project root)
+sys.path.insert(0, os.getcwd())
+
+
+def seed_everything(config: OmegaConf):
     """
     Seed everything for reproducibility.
     Args:
@@ -68,38 +65,39 @@ def seed_everything(config:OmegaConf):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(config.train.seed)
 
+
 # Define a wrapper function to get the kwargs defined by argparse
 # To Do: Need to add more arguments to the parser, right now it is just a placeholder
 def get_parser(**kwargs):
     def str2bool(v):
         if isinstance(v, bool):
             return v
-        elif v.lower() in ('yes', 'true', 't', 'y', '1'):
+        elif v.lower() in ("yes", "true", "t", "y", "1"):
             return True
-        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        elif v.lower() in ("no", "false", "f", "n", "0"):
             return False
         else:
-            raise argparse.ArgumentTypeError('Boolean value expected.')
-    
-    parser = argparse.ArgumentParser()
+            raise argparse.ArgumentTypeError("Boolean value expected.")
+
+    parser = argparse.ArgumentParser()  # TODO: variable parser assigned but unused
     pass
 
 
 # Define a helper function to change the shape into a UNet compatible shape
-def modify_weights(w, scale = 1e-6, n=2):
+def modify_weights(w, scale=1e-6, n=2):
     """Modify weights to accomodate concatenation to unet"""
-    extra_w = scale*torch.randn_like(w)
+    extra_w = scale * torch.randn_like(w)
     new_w = w.clone()
     for i in range(n):
         new_w = torch.cat((new_w, extra_w.clone()), dim=1)
     return new_w
 
 
-# Define a helper function for reproducibility for each workers 
+# Define a helper function for reproducibility for each workers
 # The original ldm repo used ImageNet to train the model, we do not have to follow it.
 def worker_init_fn(worker_id):
     worker_info = torch.utils.data.get_worker_info()
-    dataset = worker_info.dataset
+    dataset = worker_info.dataset  # TODO: variable dataset assigned but unused
     worker_id = worker_info.id
     np.random.seed(np.random.get_state()[1][0] + worker_id)
 
@@ -116,74 +114,77 @@ class CustomImageTextDataset(Dataset):
     returns:
         a dictionary containing the image and the text.
     """
-    def __init__(self, 
-                 json_file: str, 
-                 img_dir:str, 
-                 transform: Optional[transforms.Compose]=None,
-                 max_samples: int=2000
-                 ):
-        with open(json_file, 'r') as f:
+
+    def __init__(
+        self, json_file: str, img_dir: str, transform: Optional[transforms.Compose] = None, max_samples: int = 2000
+    ):
+        with open(json_file, "r") as f:
             all_metadata = [json.loads(line) for line in f]
-        self.meta_data = [metadata for metadata in all_metadata 
-                          if "pokemon" in metadata['text'].lower()]
+        self.meta_data = [metadata for metadata in all_metadata if "pokemon" in metadata["text"].lower()]
         random.shuffle(self.meta_data)
-        self.data = self.meta_data[:max_samples] # load part of the whole dataset
+        self.data = self.meta_data[:max_samples]  # load part of the whole dataset
 
         self.img_dir = img_dir
         self.transform = transform or self._default_transform()
 
     def _default_transform(self):
-        return transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+        return transforms.Compose(
+            [
+                transforms.Resize((256, 256)),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         data = self.meta_data[idx]
-        img_path = data['file_name']
-        caption = data['text'].strip() 
+        img_path = data["file_name"]
+        caption = data["text"].strip()
 
         # define training data path and load the images
         img_path = os.path.join(self.img_dir, img_path)
-        image = Image.open(img_path).convert('RGB')
-        
+        image = Image.open(img_path).convert("RGB")
+
         if self.transform:
             image = self.transform(image)
-        
-        return {
-            'image': image,
-            'txt': caption
-        }
 
-def get_data_loaders(config:OmegaConf, 
-                     json_file:Optional[str]=None, 
-                     img_dir:Optional[str]=None, 
-                     batch_size:Optional[int]=None,
-                     num_workers:Optional[int]=None):
+        return {"image": image, "txt": caption}
+
+
+def get_data_loaders(
+    config: OmegaConf,
+    json_file: Optional[str] = None,
+    img_dir: Optional[str] = None,
+    batch_size: Optional[int] = None,
+    num_workers: Optional[int] = None,
+):
     train_dataset = CustomImageTextDataset(
-        json_file=json_file if json_file else config['train']['json_file'],
-        img_dir=img_dir if img_dir else config['train']['img_dir'],
-        transform=transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.RandomCrop(256),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+        json_file=json_file if json_file else config["train"]["json_file"],
+        img_dir=img_dir if img_dir else config["train"]["img_dir"],
+        transform=transforms.Compose(
+            [
+                transforms.Resize((256, 256)),
+                transforms.RandomCrop(256),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        ),
     )
 
     val_dataset = CustomImageTextDataset(
-        json_file=json_file if json_file else config['train']['json_file'],
-        img_dir=json_file if json_file else config['train']['img_dir'],
-        transform=transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.CenterCrop(256),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+        json_file=json_file if json_file else config["train"]["json_file"],
+        img_dir=json_file if json_file else config["train"]["img_dir"],
+        transform=transforms.Compose(
+            [
+                transforms.Resize((256, 256)),
+                transforms.CenterCrop(256),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        ),
     )
 
     # train_loader = DataLoader(
@@ -197,14 +198,14 @@ def get_data_loaders(config:OmegaConf,
     #     val_dataset,
     #     batch_size=batch_size if batch_size else config['train']['batch_size'],
     #     num_workers=config['train']['num_workers'],
-    #     shuffle=False, 
+    #     shuffle=False,
     #     worker_init_fn=None
     # )
 
     return train_dataset, val_dataset
 
 
-def setup_training(config:OmegaConf, output_dir:str):
+def setup_training(config: OmegaConf, output_dir: str):
     """
     set up the config file for the training process and the output directory.
     """
@@ -213,7 +214,8 @@ def setup_training(config:OmegaConf, output_dir:str):
     # OmegaConf.save(config, os.path.join(output_dir, "config.yaml"))
     return output_dir
 
-def save_checkpoint(model: torch.nn.Module, optimizer: torch.optim, epoch:int, path:str):
+
+def save_checkpoint(model: torch.nn.Module, optimizer: torch.optim, epoch: int, path: str):
     """
     a function to save the trained checkpoint of the model.
     args:
@@ -222,13 +224,12 @@ def save_checkpoint(model: torch.nn.Module, optimizer: torch.optim, epoch:int, p
         model: the model we trained for generating the images.
         path: the path to save the state_dict of the model and the optimizer.
     """
-    torch.save({
-        'epoch': epoch,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict()
-    },path)
+    torch.save(
+        {"epoch": epoch, "model_state_dict": model.state_dict(), "optimizer_state_dict": optimizer.state_dict()}, path
+    )
 
-def load_checkpoint(model: torch.nn.Module, optimizer: torch.optim, path:str):
+
+def load_checkpoint(model: torch.nn.Module, optimizer: torch.optim, path: str):
     """
     a function to load the checkpoints of the model pretrained weights and optimizer state_dict.
     args:
@@ -240,7 +241,8 @@ def load_checkpoint(model: torch.nn.Module, optimizer: torch.optim, path:str):
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return checkpoint["epoch"]
 
-def log_images(images:torch.Tensor, step:int, output_dir:str=None, use_wandb:bool=True):
+
+def log_images(images: torch.Tensor, step: int, output_dir: str = None, use_wandb: bool = True):
     """
     log the generated images, set up a flag to define whether we will log the generated images to wandb.
     args:
@@ -255,7 +257,8 @@ def log_images(images:torch.Tensor, step:int, output_dir:str=None, use_wandb:boo
             torchvision.utils.save_image(v, image_path)
 
         if use_wandb:
-            wandb.log({k:[wandb.Image(image) for image in v]})
+            wandb.log({k: [wandb.Image(image) for image in v]})
+
 
 def get_cuda_status(start_time):
     """
@@ -264,47 +267,55 @@ def get_cuda_status(start_time):
         start_time: the time when the training process started.
     """
     torch.cuda.synchronize()
-    cuda_peak_memory = torch.cuda.max_memory_allocated() / 2 ** 20
-    elapsed_time = time.time() - start_time 
-    
+    cuda_peak_memory = torch.cuda.max_memory_allocated() / 2**20
+    elapsed_time = time.time() - start_time
+
     # this flag has already been integrated into the training loop, mayb need to be removed
     # if wandb.run is not None:
     #     wandb.log({'cuda_max_memory': cuda_peak_memory, 'elapsed_time': elapsed_time})
-        
+
     return cuda_peak_memory, elapsed_time
 
+
 # define the main function to train and test the model
-def main(path:str):
+def main(path: str):
     # Load configuration
     config = OmegaConf.load(path)
 
     # define reproducibility
     seed_everything(config)
-    
+
     # Initialize wandb, log all the hyperparameters loaded from the OmegeConf
     wandb.init(project=config.train.project_name, config=OmegaConf.to_container(config, resolve=True))
-    # I felt like the following line will also work 
-    # wandb.init(project=config.project_name, config=dict(config))    
+    # I felt like the following line will also work
+    # wandb.init(project=config.project_name, config=dict(config))
     json_file = config.train.json_file_path
     img_dir = config.train.img_dir
     batch_size = config.train.batch_size
     num_workers = config.train.num_workers
 
     # Set device, this may need to be changed if the `ddp` is integrate into the training process
-    device = torch.device(config.train.device) if config.train.device else \
-        torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    device = (
+        torch.device(config.train.device)
+        if config.train.device
+        else torch.device(
+            "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+        )
+    )
 
     # Load dataset
     # to do:need to load multiple datasets, right now there is only train data here.
     train_set, _ = get_data_loaders(config, json_file, img_dir, batch_size, num_workers)
-    dataloader = DataLoader(train_set, 
-                            batch_size=config.train.batch_size, 
-                            shuffle=True, 
-                            num_workers=config.train.num_workers, 
-                            pin_memory=config.train.pin_memory)
+    dataloader = DataLoader(
+        train_set,
+        batch_size=config.train.batch_size,
+        shuffle=True,
+        num_workers=config.train.num_workers,
+        pin_memory=config.train.pin_memory,
+    )
 
     model_params = config.model.params
-    
+
     # Instantiate the model
     model = LatentDiffusion(**model_params)
 
@@ -316,11 +327,11 @@ def main(path:str):
 
     # Set up the conditioning stage model (CLIP)
     model.cond_stage_model = FrozenCLIPEmbedder()
-    
+
     # Load the pretrained weights into the model
-    old_state = torch.load("sd-v1-4-full-ema.ckpt", map_location='cpu')
+    old_state = torch.load("sd-v1-4-full-ema.ckpt", map_location="cpu")
     old_state = old_state["state_dict"]
-    
+
     # Load the state dict
     m, u = model.load_state_dict(old_state, strict=False)
     if len(m) > 0:
@@ -335,24 +346,25 @@ def main(path:str):
     model.cond_stage_model = model.cond_stage_model.to(device)
     model = model.to(device)
 
-
     # Initialize optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=config.train.learning_rate, weight_decay=config.train.weight_decay)
+    optimizer = torch.optim.AdamW(
+        model.parameters(), lr=config.train.learning_rate, weight_decay=config.train.weight_decay
+    )
 
     # Initialize learning rate scheduler
     scheduler = CosineAnnealingLR(optimizer, T_max=config.train.num_epochs, eta_min=config.train.min_lr)
-    
+
     # Training loop
     for epoch in range(config.train.num_epochs):
         model.train()
         epoch_loss = 0.0
         start_time = time.time()
-        torch.cuda.reset_peak_memory_stats() # reset the peak memory stats to calculate the peak memory usage
+        torch.cuda.reset_peak_memory_stats()  # reset the peak memory stats to calculate the peak memory usage
         with tqdm(dataloader, desc=f"Epoch {epoch+1}/{config.train.num_epochs}") as pbar:
             for batch in pbar:
                 # Move batch to device
-                image = batch['image'].to(device)
-                text = batch['txt']
+                image = batch["image"].to(device)
+                text = batch["txt"]
 
                 # get the input condition
                 c = model.get_learned_conditioning(text)
@@ -363,10 +375,10 @@ def main(path:str):
                 # Backward pass
                 optimizer.zero_grad()
                 loss.backward()
-                
+
                 # Gradient clipping to stabilize training
                 torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.max_grad_norm)
-                
+
                 optimizer.step()
 
                 # Update progress bar
@@ -374,39 +386,41 @@ def main(path:str):
                 pbar.set_postfix({"loss": loss.item()})
 
                 # Log to wandb
-                wandb.log({
-                    "batch_loss": loss.item(),
-                    "epoch": epoch,
-                    "learning_rate": optimizer.param_groups[0]['lr']
-                })
-        
+                wandb.log({"batch_loss": loss.item(), "epoch": epoch, "learning_rate": optimizer.param_groups[0]["lr"]})
+
         epoch_time, peak_memory = get_cuda_status(start_time)
 
         # Step the scheduler
         scheduler.step()
 
         # Log epoch metrics
-        wandb.log({
-            "epoch_loss": epoch_loss / len(dataloader),
-            "epoch": epoch,
-            "epoch_time": epoch_time,
-            "peak_memory": peak_memory
-        })
+        wandb.log(
+            {
+                "epoch_loss": epoch_loss / len(dataloader),
+                "epoch": epoch,
+                "epoch_time": epoch_time,
+                "peak_memory": peak_memory,
+            }
+        )
 
         # Save checkpoint every `save_every` epochs
 
         if (epoch + 1) % config.train.save_every == 0:
             checkpoint_path = f"checkpoint_epoch_{epoch+1}.pth"
-            torch.save({
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'scheduler_state_dict': scheduler.state_dict(),
-                'loss': epoch_loss,
-            }, checkpoint_path)
+            torch.save(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "scheduler_state_dict": scheduler.state_dict(),
+                    "loss": epoch_loss,
+                },
+                checkpoint_path,
+            )
             wandb.save(checkpoint_path)
 
     wandb.finish()
+
 
 if __name__ == "__main__":
     main("conf/ddpm_config.yaml")
