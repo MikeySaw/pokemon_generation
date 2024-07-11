@@ -5,6 +5,7 @@ import torch
 
 from pokemon_stable_diffusion.ddpm_model import DDPM
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 @pytest.fixture
 def ddpm_model():
@@ -62,7 +63,7 @@ def ddpm_model():
         make_it_fit=False,
         ucg_training=None,
     )
-    return model
+    return model.to(device)
 
 def test_model_saving_loading(ddpm_model, tmp_path):
     # Save the model
@@ -123,6 +124,7 @@ def test_model_saving_loading(ddpm_model, tmp_path):
         ucg_training=None
     )
     loaded_model.load_state_dict(torch.load(save_path))
+    loaded_model.to(device)
 
     # Check if the state dicts are the same
     for param_tensor in ddpm_model.state_dict():

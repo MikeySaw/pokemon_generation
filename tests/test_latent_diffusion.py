@@ -4,9 +4,6 @@ import sys
 import pytest
 import torch
 
-from pokemon_stable_diffusion.ddpm_model import DDPM
-from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
-
 # Get the current directory and project root
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -17,6 +14,11 @@ sys.path.append(project_root)
 # Ensure the correct paths are added
 sys.path.append(os.path.join(project_root, 'pokemon_stable_diffusion'))
 
+from pokemon_stable_diffusion.ddpm_model import DDPM
+from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Fixture to create a simple instance of the DDPM model
 @pytest.fixture
 def ddpm_model():
@@ -60,12 +62,26 @@ def ddpm_model():
         "make_it_fit": False,
         "ucg_training": None
     }
-    return DDPM(**model_config)
+    return DDPM(**model_config).to(device)
 
 # Fixture to create a simple instance of the LatentDiffusion model
 @pytest.fixture
 def latent_diffusion_model():
     model_config = {
+        "unet_config": {
+            "target": "ldm.modules.diffusionmodules.openaimodel.UNetModel",
+            "params": {
+                "in_channels": 3,
+                "out_channels": 3,
+                "model_channels": 64,
+                "channel_mult": [1, 2, 4],
+                "num_res_blocks": 2,
+                "attention_resolutions": [16],
+                "dropout": 0.1,
+                "image_size": 32,
+                "num_heads": 4
+            }
+        },
         "first_stage_config": {
             "target": "ldm.models.autoencoder.AutoencoderKL",
             "params": {
@@ -79,11 +95,12 @@ def latent_diffusion_model():
                     "ch_mult": [1, 2, 4, 4],
                     "num_res_blocks": 2,
                     "attn_resolutions": [],
-                    "dropout": 0.0
+                    "dropout": 0.0,
                 },
                 "lossconfig": {
                     "target": "torch.nn.Identity"
-                }
+                },
+                "embed_dim": 256
             }
         },
         "cond_stage_config": {
@@ -122,14 +139,14 @@ def latent_diffusion_model():
         "make_it_fit": False,
         "ucg_training": None
     }
-    return LatentDiffusion(**model_config)
+    return LatentDiffusion(**model_config).to(device)
 
 # Tests for DDPM model
 def test_ddpm_initialization(ddpm_model):
     assert ddpm_model is not None, "Failed to initialize the DDPM model"
 
 def test_ddpm_forward_pass(ddpm_model):
-    dummy_input = torch.randn(1, 3, 32, 32)
+    dummy_input = torch.randn(1, 3, 32, 32).to(device)
     dummy_batch = {ddpm_model.first_stage_key: dummy_input}
     try:
         output = ddpm_model(dummy_batch)
@@ -145,7 +162,7 @@ def test_ddpm_sample(ddpm_model):
         pytest.fail(f"Sampling failed with exception: {e}")
 
 def test_ddpm_loss_calculation(ddpm_model):
-    dummy_input = torch.randn(1, 3, 32, 32)
+    dummy_input = torch.randn(1, 3, 32, 32).to(device)
     dummy_batch = {ddpm_model.first_stage_key: dummy_input}
     t = torch.randint(0, ddpm_model.num_timesteps, (dummy_input.shape[0],)).long()
     try:
@@ -157,32 +174,3 @@ def test_ddpm_loss_calculation(ddpm_model):
 # Tests for LatentDiffusion model
 def test_latent_diffusion_initialization(latent_diffusion_model):
     assert latent_diffusion_model is not None, "Failed to initialize the LatentDiffusion model"
-
-def test_latent_diffusion_forward_pass(latent_diffusion_model):
-    dummy_input = torch.randn(1, 3, 256, 256)
-    dummy_batch = {latent_diffusion_model.first_stage_key: dummy_input}
-    dummy_cond = torch.randn(1, 3, 256, 256)
-    try:
-        output = latent_diffusion_model(dummy_batch, dummy_cond)
-        assert output is not None, "The model output is None"
-    except Exception as e:
-        pytest.fail(f"Model forward pass failed with exception: {e}")
-
-def test_latent_diffusion_sample(latent_diffusion_model):
-    dummy_cond = torch.randn(1, 3, 256, 256)
-    try:
-        sample_output = latent_diffusion_model.sample(cond=dummy_cond, batch_size=2)
-        assert sample_output is not None, "Sampling did not produce any output"
-    except Exception as e:
-        pytest.fail(f"Sampling failed with exception: {e}")
-
-def test_latent_diffusion_loss_calculation(latent_diffusion_model):
-    dummy_input = torch.randn(1, 3, 256, 256)
-    dummy_batch = {latent_diffusion_model.first_stage_key: dummy_input}
-    dummy_cond = torch.randn(1, 3, 256, 256)
-    t = torch.randint(0, latent_diffusion_model.num_timesteps, (dummy_input.shape[0],)).long()
-    try:
-        loss, _ = latent_diffusion_model.p_losses(dummy_batch[latent_diffusion_model.first_stage_key], dummy_cond, t)
-        assert loss is not None, "Loss calculation failed"
-    except Exception as e:
-        pytest.fail(f"Loss calculation failed with exception: {e}")

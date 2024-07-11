@@ -3,6 +3,7 @@ import torch
 
 from pokemon_stable_diffusion.ddpm_model import DDPM
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Fixture to create a simple instance of the DDPM model
 @pytest.fixture
@@ -47,13 +48,13 @@ def ddpm_model():
         "make_it_fit": False,
         "ucg_training": None
     }
-    return DDPM(**model_config)
+    return DDPM(**model_config).to(device)
 
 def test_ddpm_initialization(ddpm_model):
     assert ddpm_model is not None, "Failed to initialize the DDPM model"
 
 def test_ddpm_forward_pass(ddpm_model):
-    dummy_input = torch.randn(1, 3, 32, 32)
+    dummy_input = torch.randn(1, 3, 32, 32).to(device)
     dummy_batch = {ddpm_model.first_stage_key: dummy_input}
     try:
         output = ddpm_model(dummy_batch)
@@ -69,7 +70,7 @@ def test_ddpm_sample(ddpm_model):
         pytest.fail(f"Sampling failed with exception: {e}")
 
 def test_ddpm_loss_calculation(ddpm_model):
-    dummy_input = torch.randn(1, 3, 32, 32)
+    dummy_input = torch.randn(1, 3, 32, 32).to(device)
     dummy_batch = {ddpm_model.first_stage_key: dummy_input}
     t = torch.randint(0, ddpm_model.num_timesteps, (dummy_input.shape[0],)).long()
     try:

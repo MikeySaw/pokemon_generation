@@ -22,6 +22,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pytest
-          pip install -e .
+          pip install -r real_requirements.txt
+          pip install -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+          pip install -e git+https://github.com/openai/CLIP.git@main#egg=clip
       - name: Run tests
         run: pytest tests/

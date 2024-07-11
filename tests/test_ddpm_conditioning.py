@@ -4,6 +4,8 @@ import torch
 from pokemon_stable_diffusion.ddpm_model import DDPM
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 @pytest.fixture
 def ddpm_model():
     model_config = {
@@ -46,7 +48,7 @@ def ddpm_model():
         "make_it_fit": False,
         "ucg_training": None
     }
-    return DDPM(**model_config)
+    return DDPM(**model_config).to(device)
 
 def test_ddpm_forward_pass_with_various_inputs(ddpm_model):
     input_shapes = [
@@ -56,7 +58,7 @@ def test_ddpm_forward_pass_with_various_inputs(ddpm_model):
     ]
     
     for shape in input_shapes:
-        dummy_input = torch.randn(shape)
+        dummy_input = torch.randn(shape).to(device)
         dummy_batch = {ddpm_model.first_stage_key: dummy_input}
         try:
             output = ddpm_model(dummy_batch)
