@@ -45,9 +45,9 @@ from omegaconf import OmegaConf
 # Import Model Libraries
 # from models.ldm.data.base import Txt2ImgIterableBaseDataset
 from ldm.utils import instantiate_from_config
+from latent_diffusion import LatentDiffusion # noqa
 from ldm.models.autoencoder import AutoencoderKL #noqa
 from ldm.modules.encoders.modules import FrozenCLIPEmbedder
-from .latent_diffusion import LatentDiffusion # noqa
 
 # Import the formatting libraries
 from typing import Optional
@@ -176,7 +176,7 @@ def get_data_loaders(config:OmegaConf,
     )
 
     val_dataset = CustomImageTextDataset(
-        json_file=json_file if json_file else config['train']['val_json'],
+        json_file=json_file if json_file else config['train']['json_file'],
         img_dir=json_file if json_file else config['train']['img_dir'],
         transform=transforms.Compose([
             transforms.Resize((256, 256)),

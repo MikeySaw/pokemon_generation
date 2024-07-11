@@ -75,7 +75,17 @@ chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
 
+
 ### Data Version Control ⚙️<a href="#top">[Back to Top]</a>
+If you want to generate captions for your own images, put them in `data/raw/` and run `src/data/add_data_description.py` \
+To get the images and captions in `data/interim/train/`, `data/interim/test/` and `data/interim/val/` run: `src/data/create_data_splits.py` \
+To generate a torch dataset run: `src/data/make_dataset.py` \
+If you want a huggingface dataset write the following into your script:
+```shell
+from src.data.make_dataset import pokemon_huggingface
+dataset = pokemon_huggingface()
+```
+Keep in mind that this requires that you have done the previous steps!
 
 run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. This will avoid version conflict problems during the dockerfile building phase. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 
