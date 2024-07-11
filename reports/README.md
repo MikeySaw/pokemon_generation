@@ -138,7 +138,21 @@ Gamze G. Kasman:  &emsp;                  12691013
 >
 > Answer:
 
---- question 3 fill here ---
+In our project, we utilized a robust set of frameworks and tools to streamline the machine learning lifecycle, ensuring our workflow was efficient, reproducible, and scalable.
+
+We used **PyTorch** as the backbone of our code, providing the computational engine and the data structures necessary for defining our models. To enhance our PyTorch workflow, we employed **PyTorch Lightning**, which offers a high-level interface with features like logging, checkpointing, early stopping, and support for multi-GPU and multi-node training.
+
+**Conda** was essential for managing dependencies and creating reproducible virtual environments. For configuration management, we used **Hydra**, which allowed us to define hierarchical configuration structures through config files.
+
+For experiment tracking and logging, we relied on **Weights and Biases (Wandb)**, which helped us track hyperparameters and results comprehensively. Whenever we encountered performance bottlenecks, we utilized a **Profiler** to diagnose and resolve these issues efficiently. **Debugging** tools were also crucial for identifying and fixing bugs in our code.
+
+**Cookiecutter** was used for organizing our code and creating standardized project templates. For containerization, **Docker** played a critical role by encapsulating our development environment and dependencies, ensuring consistency across different deployment platforms.
+
+**Data Version Control (DVC)** was used for managing data versions and synchronizing between local and remote storage. For version control of our code, we used **Git** in combination with **GitHub**, facilitating collaboration among multiple developers. **Pytest** was employed to write unit tests, ensuring new changes did not break the codebase.
+
+**Linting** tools such as **Pylint** and **Flake8** helped maintain a consistent coding style. **GitHub Actions** automated our continuous integration processes, running tests and checks upon each commit. **Cloud Build** automated the building and pushing of Docker images to our **Artifact Registry**, making deployment more efficient.
+
+For deployment, **FastAPI** was used to create REST APIs, and **Cloud Run** enabled us to deploy these APIs in a serverless manner. **Cloud Storage** provided scalable storage for our data and models, and **Compute Engine** offered the necessary compute power. For scalable and easy model training, we used **Vertex AI**. **Cloud Monitoring** helped us track logs and errors from our cloud services.
 
 ## Coding environment
 
@@ -202,7 +216,15 @@ We added linting checks that every time a new pull request is created. For this 
 >
 > Answer:
 
-We implemented three tests in total. `test_data.py` checks if both the Torch and Huggingface datasets are created properly, including train/test/val splits and tensor shapes for the Torch dataset. It also verifies the dataset length and ensures 'image' and 'text' keys exist in all splits for the Huggingface dataset. `test_model.py` verifies proper model instantiation and checks the model's output shape.
+We implemented seven tests in total. 
+- `test_data.py` checks if both the Torch and Huggingface datasets are created properly, including train/test/val splits and tensor shapes for the Torch dataset. It also verifies the dataset length and ensures 'image' and 'text' keys exist in all splits for the Huggingface dataset. 
+- `test_ddpm_checkpoint.py`: checks if the DDPM model handles conditioning correctly. It ensures that the output is consistent with the conditioned input, verifying the model's ability to process conditional data accurately.
+- `test_ddpm_conditioning.py` checks if the DDPM model handles conditioning correctly, ensuring consistent output with the conditioned input. 
+- `test_ddpm_initialization.py` verifies the initialization of the DDPM model with various configurations. It ensures that the model can handle different setups and that a forward pass with dummy data produces an expected output.
+- `test_ddpm_model.py` ensures the DDPM model can process input data through its forward pass. It verifies that the model produces the expected output shape, confirming its functional integrity.
+- `test_ddpm_saving_loading.py` ensures that the saved model state can be loaded into a new model instance. It verifies that the new instance produces the same output as the original model, ensuring consistency in model persistence and retrieval.
+- `test_ddpm_training.py` verifies that the DDPM model's loss calculation works as expected. It ensures that training updates the model's parameters correctly, maintaining the integrity of the training process.
+- `test_latent_diffusion.py` checks the functionality of the Latent Diffusion model, including model initialization, forward pass, sampling, and loss calculation. It ensures that the model behaves as expected and integrates well with the DDPM model.
 
 ### Question 8
 
@@ -217,7 +239,9 @@ We implemented three tests in total. `test_data.py` checks if both the Torch and
 >
 > Answer:
 
---- question 8 fill here ---
+Our current code coverage for this course project is 31%. While this shows that a portion of our code is covered by tests, it's important to consider the context of a course project. In educational settings, the emphasis is often on learning and understanding concepts rather than achieving high production-level metrics like code coverage.
+
+Nevertheless, striving to increase our coverage beyond 31% would still be beneficial. It allows us to practice writing more comprehensive tests, which can help in identifying and fixing potential issues earlier in the development process. This approach not only improves our understanding of testing methodologies but also contributes to producing more reliable and robust software, which is valuable even in a course project context.
 
 ### Question 9
 
@@ -250,26 +274,44 @@ Because we are multiple people, it was important for us to work on different bra
 We used Google Cloud Storage for our DVC-based storage. Initially, we only had raw images of Pokémon. To train our model, we generated captions for these images using BLIP2, saving the captions in a JSONL file. For creating a Huggingface dataset with both images and captions, and for the train/test/val split, we placed the images and JSONL captions into their respective train, test, and validation folders in the data directory.
 DVC allowed us to experiment with the dataset creation. We could move the images between folders without disrupting the data structure, and a simple `dvc pull` let us reset any changes and try again if something didn't work properly. Additionally, DVC enabled us to include data testing in our workflow. We could use `dvc pull` in our GitHub Actions workflow files to fetch the data needed for automated tests.
 
-### Question 11
+Our continuous integration (CI) setup is designed to ensure robust code quality and functionality through automated testing, linting, and data validation. We have organized our CI into three main workflows: `cml_data.yaml`, `lint.yaml`, and `testing.yaml`.
 
-> **Discuss you continues integration setup. What kind of CI are you running (unittesting, linting, etc.)? Do you test**
-> **multiple operating systems, python version etc. Do you make use of caching? Feel free to insert a link to one of**
-> **your github actions workflow.**
->
-> Recommended answer length: 200-300 words.
->
-> Example:
-> *We have organized our CI into 3 separate files: one for doing ..., one for running ... testing and one for running*
-> *... . In particular for our ..., we used ... .An example of a triggered workflow can be seen here: <weblink>*
->
-> Answer:
+#### Data Validation Workflow (`cml_data.yaml`)
 
---- question 11 fill here ---
+This workflow is triggered on pull requests and focuses on data validation. The steps involved are:
 
-## Running code and tracking experiments
+1. **Check Out the Code**: Retrieves the latest code from the repository.
+2. **Set Up Python**: Configures the Python environment.
+3. **Install Dependencies**: Installs necessary dependencies for the project.
+4. **Pull Data Using DVC**: Downloads the data required for validation.
+5. **Generate Data Statistics Report**: Creates a report summarizing the data statistics.
+6. **Comment on Pull Request**: Posts a summary of the data validation results on the pull request.
 
-> In the following section we are interested in learning more about the experimental setup for running your code and
-> especially the reproducibility of your experiments.
+This ensures that any changes to the data are tracked and validated before merging.
+
+#### Linting Workflow (`lint.yaml`)
+
+Our linting workflow ensures that the code adheres to specified style guidelines. This workflow runs on every push and pull request to the main branch. The steps involved are:
+
+1. **Check Out the Code**: Retrieves the latest code from the repository.
+2. **Set Up Python**: Configures the Python environment.
+3. **Install Dependencies**: Installs necessary linting tools.
+4. **Run Linting**: Executes linting checks to enforce code quality standards.
+
+[Link to lint.yaml](https://github.com/LuuisK/pokemon_generation/blob/main/.github/workflows/lint.yaml)
+
+#### Testing Workflow (`testing.yaml`)
+
+This workflow is responsible for running unit tests to ensure code functionality. It is triggered on every push and pull request. The steps involved are:
+
+1. **Check Out the Code**: Retrieves the latest code from the repository.
+2. **Set Up Python**: Configures the Python environment with multiple Python versions.
+3. **Install Dependencies**: Installs project dependencies and testing tools.
+4. **Run Tests**: Executes the test suite to verify code correctness.
+
+[Link to testing.yaml](https://github.com/LuuisK/pokemon_generation/blob/main/.github/workflows/testing.yaml)
+
+By separating our CI into these workflows, we ensure a modular and efficient process for maintaining code quality and integrity across different aspects of the project.
 
 ### Question 12
 
@@ -381,7 +423,25 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 15 fill here ---
+For our project, we developed multiple Docker images to facilitate different stages of our workflow, including training, inference, and deployment. Docker was instrumental in ensuring a consistent environment across various stages and different machines. We used specific Dockerfiles tailored for each task to encapsulate the necessary dependencies and configurations.
+
+To run the training Docker image, we used the following command:
+
+```bash
+docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY fd_train:latest
+```
+
+This command ensures the use of GPU resources, sets up the necessary environment variables for logging with Weights and Biases, and executes the training process within the container.
+
+Additionally, we built Docker images for data testing to ensure the correct functioning of DVC (Data Version Control) and for deployment via Google Cloud Run. Here is the link to one of our Dockerfiles used for training: Dockerfile for Training.
+
+By utilizing Docker, we achieved reproducibility, streamlined deployment, and isolated environments, which significantly enhanced our development and deployment workflow.
+
+- [Dockerfile for Data Testing](https://github.com/LuuisK/pokemon_generation/blob/main/datatest.dockerfile)
+- [Dockerfile for DVC Data](https://github.com/LuuisK/pokemon_generation/blob/main/dvcdata.dockerfile)
+- [Dockerfile for Google Cloud Run](https://github.com/LuuisK/pokemon_generation/blob/main/gcloudrun.dockerfile)
+- [Dockerfile for Stable Diffusion Fine-tuning](https://github.com/LuuisK/pokemon_generation/blob/main/sd_finetune.dockerfile)
+- [Dockerfile for Test Trainer](https://github.com/LuuisK/pokemon_generation/blob/main/test_trainer.dockerfile)
 
 ### Question 16
 
@@ -396,7 +456,21 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 16 fill here ---
+When running into bugs during our experiments, we performed debugging by utilizing print statements to trace the flow of execution and identify where issues occurred. Additionally, we used tools like `pytest` to run test files and ensure the code was functioning as expected. Some parts of our debugging process involved checking and fixing paths inside different test files to ensure they pointed to the correct locations.
+
+Regarding profiling, we worked on profiling and corresponding acceleration methods to optimize our code's performance. One of the ideas we implemented was to create a slower version of inference deliberately, play with the profiler, and then make it faster later. This involved experimenting with inefficient memory behavior first, such as using `.to(device)` instead of specifying `device=device`.
+
+For Docker-specific issues, we implemented a thorough debugging process. This included checking existing Docker images with `docker images` and removing unnecessary ones using `docker rmi IMAGE_ID`. If issues with deleting images arose, we used commands like `docker rm numbers` or `docker rmi numbers`. Additionally, we ensured proper GPU support by checking NVIDIA drivers and CUDA toolkit availability using `nvidia-smi` and `nvcc --version`. If further issues persisted, we installed additional tools using:
+
+```bash
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+These debugging and profiling efforts helped us identify bottlenecks and improve the efficiency and correctness of our code.
 
 ## Working in the cloud
 
@@ -413,7 +487,17 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following GCP services in our project:
+
+1. **Google Cloud Storage (GCS)**: We used GCS as our data remote storage for DVC (Data Version Control). This allowed us to manage and version our dataset efficiently.
+
+2. **Google Cloud Run**: Cloud Run was used to deploy our trained model as a web service. This service allows us to run containerized applications in a fully managed environment, facilitating easy scaling and management of our deployment.
+
+3. **Google Compute Engine**: Compute Engine was utilized to create instances with Nvidia T4 GPUs for training our models. This service provided the necessary computational resources for our training tasks.
+
+4. **Google Artifact Registry**: This service was used to store and manage our Docker images. We built Docker images and pushed them to the Artifact Registry for deployment on Cloud Run.
+
+These GCP services provided a comprehensive infrastructure to support our machine learning operations, from data storage to model deployment.
 
 ### Question 18
 
@@ -428,7 +512,19 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 18 fill here ---
+We used Google Compute Engine to train our diffusion models. Specifically, we created instances with Nvidia T4 GPUs to provide the necessary computational power for our training tasks. The steps to create these instances included selecting the `pytorch-latest-gpu` image from the deeplearning-platform-release family and specifying the type of accelerator as `nvidia-tesla-t4`.
+
+Here is an example of the command used to create such an instance:
+
+```bash
+gcloud compute instances create adios1 \
+--zone="asia-northeast3-c" \
+--image-family="pytorch-latest-gpu" \
+--image-project=deeplearning-platform-release \
+--accelerator="type=nvidia-tesla-t4,count=1" \
+--maintenance-policy TERMINATE 
+```
+By using these GPU-enabled instances, we ensured that our model training processes were efficient and could handle the heavy computational load required by our diffusion models.
 
 ### Question 19
 
@@ -471,7 +567,32 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 22 fill here ---
+Yes, we successfully deployed our model both locally and on the cloud. For local deployment, we used FastAPI to create a web application that serves the model. The application handles requests and generates Pokémon images based on the given text prompts. We started the local server using: 
+
+```bash
+python python app.py
+```
+
+To invoke the local service, users can access the interactive API documentation at [http://localhost:8080/docs](http://localhost:8080/docs)
+ and use the provided interface to generate images by submitting text prompts.
+
+ For cloud deployment, we used Google Cloud Run. We first built a Docker image of our application using the following command:
+
+ ```bash
+docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+```
+
+Then, we deployed the Docker image to Google Cloud Run:
+
+ ```bash
+gcloud run deploy --image gcr.io/your-project-id/gcp_test_app --platform managed --region us-central1 --allow-unauthenticated --memory 32Gi --cpu 8
+```
+
+To invoke the cloud service, users can send a POST request to the deployed endpoint:
+
+ ```bash
+curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Pikachu"}' <weburl>
+```
 
 ### Question 23
 
@@ -521,7 +642,21 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 25 fill here ---
+The machine learning operations pipeline begins with data downloading, where images of Pokémon are collected from sources like Kaggle. The data is stored and managed in the data/raw/ directory and processed using scripts to create datasets for training, validation, and testing.
+
+Next, experiments are initiated on the local machine, utilizing tools such as Weights & Biases (W&B) and Hydra for experiment tracking and configuration management. These tools assist in managing configurations and tracking the performance of various experiments.
+
+Before committing code to GitHub, pre-commit hooks are employed to ensure code quality. These hooks perform various checks to catch issues early in the development process. Once the code passes these checks, it is committed and pushed to GitHub, which serves as the central repository for the codebase.
+
+Upon pushing the code to GitHub, GitHub Actions are triggered. These actions automate tasks including running tests and quality checks such as CodeCov for code coverage, flake8 for style guide enforcement, isort for sorting imports, and mypy for static type checking. This automation ensures that the code maintains high standards of quality and reliability.
+
+Google Cloud Platform (GCP) is then used to trigger build processes. The latest code is built and pushed to the Container Registry, creating a new Docker image that contains the latest version of the application and its dependencies.
+
+Docker stores the latest image, facilitating consistent deployment across different environments. The AI Platform takes the latest experiments and runs them, aiming to deploy the best model. While deployment automation is not yet implemented, this step signifies the intention to deploy the best model once identified.
+
+Users interact with the system by cloning the source code from GitHub and pulling the latest Docker image. This ensures that users always have access to the most recent version of the code and environment, enabling seamless development and testing.
+
+Overall, this pipeline streamlines the process from data downloading to model deployment, incorporating continuous integration and continuous delivery (CI/CD) practices, and leveraging cloud services for scalability and efficiency.
 
 ### Question 26
 
@@ -535,7 +670,15 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 26 fill here ---
+The biggest challenges in the project were primarily centered around data management, debugging complex issues, and optimizing the performance of our machine learning models.
+
+One significant struggle was handling and processing the large dataset of Pokémon images. The initial data downloading and preprocessing steps were time-consuming and prone to errors. To overcome these challenges, we implemented robust data pipelines using tools like DVC (Data Version Control) to track data versions and ensure reproducibility. We also automated the data preprocessing steps with well-documented scripts, which reduced manual errors and saved time.
+
+Debugging was another major challenge, especially when dealing with issues related to Docker and GPU support. Setting up the Docker environment to ensure compatibility with NVIDIA GPUs and CUDA was particularly tricky. We spent a considerable amount of time troubleshooting environment issues, such as checking NVIDIA driver installations and CUDA toolkit availability. Using commands like nvidia-smi and nvcc --version, along with additional setup steps for NVIDIA Docker support, helped resolve these issues.
+
+Optimizing the model's performance also required significant effort. Profiling the code to identify bottlenecks and implementing corresponding acceleration methods were critical steps. We deliberately created a slower version of the inference process to play with the profiler and identify inefficient memory behaviors. This approach allowed us to make targeted improvements and enhance the model's performance.
+
+Additionally, managing the continuous integration and continuous deployment (CI/CD) pipeline posed its own set of challenges. Ensuring that all tests, linting, and quality checks ran smoothly in GitHub Actions required careful configuration and frequent troubleshooting. Pre-commit hooks and automated testing helped maintain code quality, but setting these up correctly took time and effort.
 
 ### Question 27
 
@@ -552,4 +695,11 @@ Here, we experimented with changing the number of diffusion steps. This paramete
 >
 > Answer:
 
---- question 27 fill here ---
+This project was a collaborative effort, with each team member contributing to different aspects of the work:
+
+- Student 12672582 was in charge of the modeling, led the efforts in training the models in the cloud and optimizing the performance of our machine learning models. They worked extensively with Google Cloud Platform and handled the deployment of the models, ensuring scalability and efficiency. They contributed significantly to the readme file, set up many configuration files, developing the Docker containers for training and deploying our applications. They also contributed to debugging and resolving complex issues. Contributed to this document as well. They also integrated Hydra for configuration management.
+- Student 1215036 focused on the data pipeline, managing data downloading, preprocessing, and version control using DVC. They also handled the integration of data into the training process, ensuring that the datasets were correctly formatted and accessible. Helped with setting up the structure of the repository. Contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks. They also contributed to debugging and resolving complex issues. Contributed to this document as well. 
+- Student 12285004 was responsible for setting up the initial cookie cutter project structure. They ensured that the development environment was standardized and reproducible. Developed configuration files, contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks quality checks using pytest. Contributed to this document as well. 
+- Student 12691013 was responsible for the experiment running on wandb. Contributed to quality checks quality checks using pytest. Contributed to this document as well. 
+
+All members contributed to the coding, testing, and documentation processes, ensuring a cohesive and well-documented project.
