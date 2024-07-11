@@ -5,6 +5,8 @@ import torch.nn as nn
 from pokemon_stable_diffusion.ddpm_model import DDPM
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class DummyModel(nn.Module):
     def __init__(self, image_size, in_channels, out_channels):
         super().__init__()
@@ -26,7 +28,7 @@ def test_ddpm_initialization(image_size, channels, use_ema):
         'target': 'pokemon_stable_diffusion.ddpm_model.DiffusionWrapper',
         'params': {
             'diff_model_config': {
-                'target': 'tests.test_model_initialization.DummyModel',
+                'target': 'tests.test_ddpm_initialization.DummyModel',
                 'params': {
                     'image_size': image_size,
                     'in_channels': channels,
@@ -66,9 +68,9 @@ def test_ddpm_initialization(image_size, channels, use_ema):
         logvar_init=0.,
         make_it_fit=False,
         ucg_training=None,
-    )
+    ).to(device)
     assert model is not None
-    dummy_input = torch.randn(1, channels, image_size, image_size)
+    dummy_input = torch.randn(1, channels, image_size, image_size).to(device)
     dummy_batch = {model.first_stage_key: dummy_input}
     output = model(dummy_batch)
     assert output is not None
