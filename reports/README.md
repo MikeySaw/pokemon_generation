@@ -138,7 +138,25 @@ Gamze G. Kasman:  &emsp;                  12691013
 >
 > Answer:
 
---- question 3 fill here ---
+## Frameworks and Tools Used
+
+In our project, we utilized a robust set of frameworks and tools to streamline the machine learning lifecycle, ensuring our workflow was efficient, reproducible, and scalable.
+
+We used **PyTorch** as the core framework for developing and training our models due to its flexibility and powerful capabilities. To enhance our PyTorch workflow, we employed **PyTorch Lightning**, which provided a higher-level interface that simplified model training with features like logging, checkpointing, early stopping, and support for multi-GPU training.
+
+**Conda** was essential for managing dependencies and creating reproducible virtual environments. We used **Hydra** for its powerful configuration management, allowing us to organize our experimental configurations hierarchically.
+
+For experiment tracking and logging, we relied on **Weights and Biases (Wandb)**, which helped us keep detailed records of our hyperparameters and results.
+
+To maintain code quality and consistency, we utilized **Pytest** for unit testing and linting tools like **Pylint** and **Flake8** to enforce coding standards. **Git** and **GitHub** facilitated version control and collaboration, while **GitHub Actions** automated our continuous integration processes, running tests and checks upon each commit.
+
+For containerization, **Docker** was critical. It allowed us to encapsulate our development environment and dependencies, ensuring consistency across different deployment platforms. We also used **Cloud Build** to automate the building and pushing of Docker images to our **Artifact Registry** for easy access and deployment.
+
+In terms of deployment, we leveraged various cloud and server-based services extensively. **Cloud Storage** provided scalable storage for our data and models, and **Compute Engine** offered the necessary compute power. To serve our models, we employed **FastAPI** for creating REST APIs and **Cloud Run** for deploying these APIs in a serverless manner.
+
+For data version control, **DVC (Data Version Control)** was used to manage and synchronize data versions between local and remote storage efficiently. We also utilized **Cookiecutter** for creating standardized project templates, ensuring our codebase was well-organized.
+
+In monitoring, **Cloud Monitoring** helped us keep track of logs and errors from our cloud services.
 
 ## Coding environment
 
