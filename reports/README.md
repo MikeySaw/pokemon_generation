@@ -283,7 +283,6 @@ DVC allowed us to experiment with the dataset creation. We could move the images
 >
 > Answer:
 
-```--- question 12 fill here ---```
 We used Hydra for configuring our experiments, which allowed us to dynamically load and merge configuration files. This setup provided flexibility in managing hyperparameters and other configurations without modifying the code. For instance, we have a default configuration file (`config.yaml`) and additional configuration files for different experiments, such as `lower_lr.yaml` for experimenting with a lower learning rate and `sgd.yaml` for using the SGD optimizer.
 
 To run an experiment with a different configuration, we used the following command:
@@ -310,8 +309,6 @@ python src/modeling/train_ddpm_example.py --config-name config +optimizer=sgd
 > *one would have to do ...*
 >
 > Answer:
-
-```--- question 13 fill here ---```
 
 We made extensive use of configuration files to ensure reproducibility. Each experiment's configuration was defined in YAML files, which were version-controlled using Git. This approach ensured that all changes to the configurations were tracked and could be reviewed or reverted if necessary.
 
@@ -345,7 +342,6 @@ python src/modeling/train_ddpm_example.py --config-name config +diffusion_steps=
 >
 > Answer:
 
-```--- question 14 fill here ---```
 In our experiments tracked using Weights & Biases (W&B), we focused on several key metrics:
 
 1. **Training Loss**: This metric is crucial for understanding how well the model is learning from the training data over time. A decreasing training loss indicates that the model is improving.
