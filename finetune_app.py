@@ -38,7 +38,7 @@ async def generate(request: GenerationRequest):
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Pokemon Stable Diffusion API. Use /generate to create images."}
+    return {"message": "Welcome to the Pokemon Stable Diffusion API. Use /generate to create images. Add /docs to the URL"}
 
 if __name__ == "__main__":
     import uvicorn
