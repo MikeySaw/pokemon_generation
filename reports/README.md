@@ -122,9 +122,9 @@ Gamze G. Kasman
 > Answer:
 
 Michael Sawitzki: &emsp;                  12150362\
-Meimingwei Li:    &emsp;&emsp;            TODO\
+Meimingwei Li:    &emsp;&emsp;            12672582\
 Luis Karrlein:    &emsp;&emsp;&emsp;      12285004\
-Gamze G. Kasman:  &emsp;                  TODO
+Gamze G. Kasman:  &emsp;                  12691013
 
 ### Question 3
 >
@@ -283,7 +283,19 @@ DVC allowed us to experiment with the dataset creation. We could move the images
 >
 > Answer:
 
---- question 12 fill here ---
+We used Hydra for configuring our experiments, which allowed us to dynamically load and merge configuration files. This setup provided flexibility in managing hyperparameters and other configurations without modifying the code. For instance, we have a default configuration file (`config.yaml`) and additional configuration files for different experiments, such as `lower_lr.yaml` for experimenting with a lower learning rate and `sgd.yaml` for using the SGD optimizer.
+
+To run an experiment with a different configuration, we used the following command:
+
+```bash
+python src/modeling/train_ddpm_example.py --config-name config +training_params=lower_lr
+```
+
+or for the SGD optimizer:
+
+```bash
+python src/modeling/train_ddpm_example.py --config-name config +optimizer=sgd
+```
 
 ### Question 13
 
@@ -298,7 +310,22 @@ DVC allowed us to experiment with the dataset creation. We could move the images
 >
 > Answer:
 
---- question 13 fill here ---
+We made extensive use of configuration files to ensure reproducibility. Each experiment's configuration was defined in YAML files, which were version-controlled using Git. This approach ensured that all changes to the configurations were tracked and could be reviewed or reverted if necessary.
+
+Whenever an experiment is run, the following happens:
+
+1. **Configuration Management**: The base configuration file (`config.yaml`) is loaded, and additional configuration files (e.g., `lower_lr.yaml`, `sgd.yaml`) are merged as specified through command-line overrides.
+2. **Logging with W&B**: Weights and Biases (W&B) was used to log all experiment details, including hyperparameters, training metrics, and model artifacts. This ensured that all aspects of the experiments were recorded and could be accessed later.
+3. **Hydra's Logging**: Hydra's built-in logging capabilities were used to save the final merged configuration for each experiment. This saved configuration file included all the parameters used, ensuring that the exact settings could be replicated.
+
+To reproduce an experiment, one would:
+
+1. **Checkout the Git Commit**: Ensure that you are on the same commit of the codebase that was used for the experiment.
+2. **Use the Same Configuration**: Run the experiment with the same configuration files and command-line overrides used initially. For example:
+```bash
+python src/modeling/train_ddpm_example.py --config-name config +diffusion_steps=ddim
+```
+3. **Review W&B Logs**: Refer to the logs and metrics stored in W&B to verify the results and compare them against the new run.
 
 ### Question 14
 
@@ -315,7 +342,31 @@ DVC allowed us to experiment with the dataset creation. We could move the images
 >
 > Answer:
 
---- question 14 fill here ---
+In our experiments tracked using Weights & Biases (W&B), we focused on several key metrics:
+
+1. **Training Loss**: This metric is crucial for understanding how well the model is learning from the training data over time. A decreasing training loss indicates that the model is improving.
+2. **Validation Loss**: This helps us monitor the model's performance on unseen data, ensuring it is not overfitting to the training data.
+3. **Learning Rate**: By logging the learning rate, we can analyze its impact on the training dynamics and make adjustments if necessary.
+4. **Generated Samples**: Periodically logging generated samples allows us to visually inspect the quality of the images produced by the model during training.
+
+These metrics provide a comprehensive overview of the model's training process and performance, enabling us to make informed decisions to improve the model.
+
+As seen in the images below, we tracked these metrics across different experimental configurations:
+
+#### Default Run
+In this default run, we tracked the model's performance using the initial configurations. This provided a baseline to compare against other experimental setups.
+
+![Default Run](figures/default_run.png)
+
+#### Lower Learning Rate
+In this experiment, we adjusted the learning rate to observe its effect on the training process. A lower learning rate can lead to more stable training but may require more epochs to converge.
+
+![Lower Learning Rate](figures/lower_lr_run.png)
+
+#### Diffusion Steps
+Here, we experimented with changing the number of diffusion steps. This parameter affects the granularity of the model's denoising process, influencing the quality of generated samples.
+
+![Diffusion Steps](figures/diffusion_run.png)
 
 ### Question 15
 
