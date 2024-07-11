@@ -1,3 +1,0 @@
-# @package _global_
-diffusion:
-  n_steps: 250
