@@ -90,6 +90,19 @@ pip install dvc-gs
 dvc pull
 ```
 
+### Reproduce Dataset creation
+
+If you want to create a dataset with your own images run the following. This will generate captions for your images, move the images and created jsonl files to their respective train/test/val folders and create a dataset for you. Make sure to have your images in the `data/raw` directory:
+
+```shell
+# generate captions with BLIP2
+python src/data/add_data_description.py
+# create train/test/val split
+python src/data/create_data_splits.py
+# create a torch dataset for train/test/val split
+python src/data/make_dataset.py
+```
+
 ### Hydra Test 👾 <a href="#top">[Back to Top]</a>
 
 please check the `config/` folder for different hyperparameter settings, to add your own experiment hyperparameters, simply add another `yaml` file inside the `config/` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
