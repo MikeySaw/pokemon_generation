@@ -622,7 +622,7 @@ Yes, we managed to monitor our deployed model, by setting up the `Monitor` secti
 >
 > Answer:
 
---- question 24 fill here ---
+The Compute Engine cost 27.03 Euros, Tax cost 5.35 Euros,Artifact Registry cost 1.16 Euro, in total, 33.6 Euros was spent during development. The Compute Engine costing the most was due to GPU and other hardware rents.  
 
 ## Overall discussion of project
 
