@@ -434,6 +434,13 @@ sudo usermod -aG docker $USER
 Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
 After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
+### Data Shifting Check
+To check the model robustness torwards data drifting during the image generation, simply run the following commands:
+```shell
+python data_drifting
+google-chrome image_drift_report.html
+```
+
 ### Model Building and Multi-GPUs training with Diffusers and Huggingface
 
 To train a diffusion model with Multi-GPUs and algorithm like `LoRA`, please run the following commands:
