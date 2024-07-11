@@ -28,12 +28,12 @@ RUN ls -1  data/interim/train| wc -l
 COPY conf/ conf/
 COPY ldm/  ldm/
 COPY pokemon_stable_diffusion/ pokemon_stable_diffusion/
-COPY real_requirements.txt real_requirements.txt
+COPY requirements.txt requirements.txt
 COPY metadata.jsonl metadata.jsonl
 COPY data/ data/    
 RUN find data/ -type f | wc -l
 
-RUN pip install -r real_requirements.txt --no-cache-dir
+RUN pip install -r requirements.txt --no-cache-dir
 
 # the following command will reuse the cache, this will make the installation process faster
 # RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
