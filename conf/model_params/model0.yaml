@@ -1,5 +1,0 @@
-image_channels: 3
-n_channels: 64
-channel_multipliers: [1, 2, 2, 4]
-is_attn: [False, False, True, True]
-n_blocks: 2
