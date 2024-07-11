@@ -83,6 +83,7 @@ train:
   resume: "checkpoints/last.ckpt"
   resume_optimizer: true
   resume_lr_scheduler: true
+  project_name: "diffusion"
   pin_memory: true
   device : "cuda"
   model: LatentDiffusionModel
@@ -91,8 +92,4 @@ train:
   learning_rate: 1.0e-04
   weight_decay: 0.0
   min_lr: 1.0e-06
-
-wandb:
-  entity: 4noobs
-  project: pokemon_generation
   
