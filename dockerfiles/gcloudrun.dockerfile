@@ -21,7 +21,7 @@ RUN pip install -r real_requirements.txt --no-cache-dir
 RUN pip install fastapi uvicorn
 
 # Copy the FastAPI app
-COPY app.py /app/app.py
+COPY src/app.py /app/app.py
 
 # Expose the port the app runs on
 EXPOSE 8080
