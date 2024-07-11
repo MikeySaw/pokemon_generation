@@ -18,7 +18,7 @@ Everyone contributed equal and faily during the whole project! 🙌🙌🙌
 
 ### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
 
-Before start to `git add` anything related to this repo, please make sure you run the following commands! 😱😱😱
+Before start to `git add` anything related to this repo, please make sure you run the following commands! 
 
 ```shell
 # Get the newest version of the repo！
@@ -40,17 +40,18 @@ pre-commit run --files YOUR_FILE_NAME
 # git add / git commit / git push ...
 ```
 
-### Train a diffusion model from scratch
-
-__This section is still under heavy construction work__, please come back very often to check the newest progress about our project 🤩🤩🤩
-To train a diffusion model from scratch, simply run the following commands:
-
+### Finetune a Stable Diffusion 🔥
+To finetune a Stable Diffusion Model simply run the following commands:
+```shell
+python pokemon_stable_diffusion/sd_finetune.py
+```
+To train a `DDPM` model from scratch(Backbone of our SD), simply run the following commands.
 ```shell
 cd src/modeling/
 python train_ddpm_example.py
 ```
 
-Alert!!!🚨 You must have a very nice GPU if you want to run the training commands!
+__Alert!!!🚨 You must have a very nice GPU if you want to run the training commands!__
 
 ### Test Stable Diffusion Model with a dummy input
 
@@ -62,7 +63,7 @@ python pokemon_stable_diffusion/latent_diffusion.py
 
 This will run the `dummy training` process based on a `dummy image` and a `dummy txt`. \
 You will see the generated images `sample_0.png`, if the code is executed correctly.
-__Alert!You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
+__Alert!🚨 You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
 
 ### Data Download Part 🚚 <a href="#top">[Back to Top]</a>
 
@@ -75,17 +76,7 @@ chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
 
-
-### Data Version Control ⚙️<a href="#top">[Back to Top]</a>
-If you want to generate captions for your own images, put them in `data/raw/` and run `src/data/add_data_description.py` \
-To get the images and captions in `data/interim/train/`, `data/interim/test/` and `data/interim/val/` run: `src/data/create_data_splits.py` \
-To generate a torch dataset run: `src/data/make_dataset.py` \
-If you want a huggingface dataset write the following into your script:
-```shell
-from src.data.make_dataset import pokemon_huggingface
-dataset = pokemon_huggingface()
-```
-Keep in mind that this requires that you have done the previous steps!
+### Data Version Control ⚙️ <a href="#top">[Back to Top]</a>
 
 run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. This will avoid version conflict problems during the dockerfile building phase. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 
@@ -99,7 +90,7 @@ pip install dvc-gs
 dvc pull
 ```
 
-### Hydra Test <a href="#top">[Back to Top]</a>
+### Hydra Test 👾 <a href="#top">[Back to Top]</a>
 
 please check the `config/` folder for different hyperparameter settings, to add your own experiment hyperparameters, simply add another `yaml` file inside the `config/` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 
@@ -130,7 +121,7 @@ We can change the config settings during the _training/sampling_ in command line
 python train.py optimizer=sgd
 ```
 
-### Github Actions & Continuous Integration & Docker Build Workflow <a href="#top">[Back to Top]</a>
+### Github Actions & Continuous Integration & Docker Build Workflow 🐝 <a href="#top">[Back to Top]</a>
 
 For github actions related file, please check the `.github/workflows`, this folder includes all the github actions which will be trigged when we push/pull into our repo, to be more specific about those files, here is a brief introduction about what those files are doing: \
 the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
@@ -141,7 +132,7 @@ When pull/merge to the github repo, the Google Cloud will automatically trigger 
 
 To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
-### Pytest Test <a href="#top">[Back to Top]</a>
+### Pytest Test ✔️ <a href="#top">[Back to Top]</a>
 
 To run `.py` files related to the  `pytest` package, simply run the following command:
 
@@ -158,7 +149,7 @@ def test_...(*args, **kwargs):
     ...
 ```
 
-### Coverage <a href="#top">[Back to Top]</a>
+### Coverage ⌛ <a href="#top">[Back to Top]</a>
 To calculate the coverage rate of all the `pytest` related tests, simply run the following commands:
 ```shell
 coverage run -m pytest tests/
@@ -167,7 +158,7 @@ coverage run -m pytest tests/
 coverage report
 ``` 
 
-### Dockerfile Test🐋<a href="#top">[Back to Top]</a>
+### Dockerfile Test 🐋 <a href="#top">[Back to Top]</a>
 
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile.
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
@@ -183,7 +174,7 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
 
-### Dockerfile Building Up commmands🐳 <a href="#top">[Back to Top]</a>
+### Dockerfile Building Up commmands 🐳 <a href="#top">[Back to Top]</a>
 To build the training dockerfile, please run the following commands:
 ```shell
 # If you encounter issues, consider use `sudo` before the whole command
@@ -257,7 +248,7 @@ sudo systemctl restart docker
 ```
 After running those commands, your dockerfile should now work with GPU support very smoothly!🏎️
 
-### Cloud Training commands☁️ <a href="#top">[Back to Top]</a>
+### Cloud Training commands ☁️ <a href="#top">[Back to Top]</a>
 To start the cloud training in _GCloud Compute Engine_ with _Nvidia GPU_ support, simply run the following commands to check the available GPUs in different ZONE first:
 ```shell
 gcloud compute accelerator-types list
@@ -317,7 +308,7 @@ gcloud ai custom-jobs create \
   --config=job_config.yaml
 ```
 
-### Deploy Model Via FastAPI <a href="#top">[Back to Top]</a>
+### Deploy Model Via FastAPI 🧑‍💻 <a href="#top">[Back to Top]</a>
 Wanna see an image which should be a pokemon but does not looks like a pokemon at all? 👀 Simply run the following commands!
 ```shell
 # Deploy the model locally via FastAPI!
@@ -338,7 +329,7 @@ If you want to check the monitoring of the deployed application, simply go to th
 http://localhost:8080/metrics
 ```
 
-### Serve Model Locally <a href="#top">[Back to Top]</a>
+### Serve Model Locally 👩‍💻 <a href="#top">[Back to Top]</a>
 To serve our latent diffusion model locally, simply run the following commands!
 ```shell
 torch-model-archiver --model-name latent_diffusion   \
@@ -441,7 +432,7 @@ python pokemon_stable_diffusion/sd_finetune_pl.py
 The `lightning` package has one parameter inside the `Trainer` for `profiler`, simply set it up by `Trainer(profiler="simple", ...)`, this will return the profiling report at the end of the training.
 To train the model with `DDP` strategy, simply add change the `ddp` flag inside the argparse as `True`, this will activate `DDP` training with `2` GPUs activated for training, for data loading, since in all the files the `num_workers` related parameter are setted up with value larger than `1`, we are always using the data distributed loading.
 
-### Model Pruning&Compiling&Quantization
+### Model Pruning&Compiling&Quantization 🪄
 To get a "smaller" version model with model compiling, simply run the following commands:
 ```shell
 python pruning.py
@@ -453,11 +444,11 @@ torch.compile(model)
 This works like a free gift and will accelerate the speed by 20 to 30 percent.
 For Quantization, simply add this trick to your code:
 ```shell
-    # run faster
-    tf32 = True
-    torch.backends.cudnn.allow_tf32 = bool(tf32)
-    torch.backends.cuda.matmul.allow_tf32 = bool(tf32)
-    torch.set_float32_matmul_precision('high' if tf32 else 'highest')
+# run faster
+tf32 = True
+torch.backends.cudnn.allow_tf32 = bool(tf32)
+torch.backends.cuda.matmul.allow_tf32 = bool(tf32)
+torch.set_float32_matmul_precision('high' if tf32 else 'highest')
 ```
 This could accelerate your training/inference speed up to 50 percent.
 
@@ -516,5 +507,3 @@ To delete all unused images (warning) and run docker garbage collection run the 
 ```shell
 docker system prune -af
 ```
-
-TODO: add a "make clean" command to the Makefile
