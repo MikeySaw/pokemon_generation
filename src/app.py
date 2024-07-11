@@ -1,15 +1,19 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import torch
 from omegaconf import OmegaConf
 from torchvision.utils import save_image
-from io import BytesIO
-import base64
+from tempfile import NamedTemporaryFile
 
+<<<<<<< HEAD:src/app.py
 from ldm.models.autoencoder import AutoencoderKL  # noqa
+=======
+from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
+from ldm.models.autoencoder import AutoencoderKL
+>>>>>>> refs/remotes/origin/main:app.py
 from ldm.modules.encoders.modules import FrozenCLIPEmbedder
 from ldm.models.diffusion.ddim import DDIMSampler
-from pokemon_stable_diffusion.latent_diffusion import LatentDiffusion
 
 app = FastAPI()
 
@@ -17,7 +21,7 @@ app = FastAPI()
 class GenerationRequest(BaseModel):
     prompt: str
 
-
+# Load model (do this at startup)
 def load_model():
     # Load configuration
     model_config = OmegaConf.load("conf/ddpm_config.yaml")
@@ -60,16 +64,20 @@ async def generate(request: GenerationRequest):
         x_samples = model.decode_first_stage(samples)
         x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
-        # Convert image to base64
-        buffer = BytesIO()
-        save_image(x_samples[0], buffer, format="PNG")
-        buffer.seek(0)
-        img_base64 = base64.b64encode(buffer.getvalue()).decode()
+        # Save image to a temporary file
+        with NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+            save_image(x_samples[0], temp_file.name)
+            temp_file_path = temp_file.name
 
-        return {"image": img_base64}
+        # Return the image file
+        return FileResponse(temp_file_path, media_type="image/png", filename="generated_image.png")
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Latent Diffusion API 🔥🔥🔥. Use /generate to create images🦉🦉🦉."}
 
 if __name__ == "__main__":
     import uvicorn
