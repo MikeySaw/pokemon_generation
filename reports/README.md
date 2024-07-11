@@ -533,7 +533,8 @@ By using these GPU-enabled instances, we ensured that our model training process
 >
 > Answer:
 
---- question 19 fill here ---
+![Data Storage1](figures/Storage_Bucket.png)
+![Data Storage2](figures/data_storage_detail.png)
 
 ### Question 20
 
@@ -542,7 +543,7 @@ By using these GPU-enabled instances, we ensured that our model training process
 >
 > Answer:
 
---- question 20 fill here ---
+![Container Registry](figures/container_regisrty.png)
 
 ### Question 21
 
@@ -551,7 +552,7 @@ By using these GPU-enabled instances, we ensured that our model training process
 >
 > Answer:
 
---- question 21 fill here ---
+![Container Registry](figures/cloudbuildhistory.png)
 
 ### Question 22
 
@@ -607,7 +608,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Pikachu"}' <web
 >
 > Answer:
 
---- question 23 fill here ---
+Yes, we managed to monitor our deployed model, by setting up the `Monitor` section in Google Cloud, we will receive an alert once the deployed model logged many requests in a very short time, we also setted up monitoring data drifting by using  the `evidently` package and use pretrained `CLIP` model to extract features from generated images, we also setted up local monitoring by integrating `prometheus-fastapi-instrumentator` package into our fastapi application.
 
 ### Question 24
 
@@ -698,8 +699,8 @@ Additionally, managing the continuous integration and continuous deployment (CI/
 This project was a collaborative effort, with each team member contributing to different aspects of the work:
 
 - Student 12672582 was in charge of the modeling, led the efforts in training the models in the cloud and optimizing the performance of our machine learning models. They worked extensively with Google Cloud Platform and handled the deployment of the models, ensuring scalability and efficiency. They contributed significantly to the readme file, set up many configuration files, developing the Docker containers for training and deploying our applications. They also contributed to debugging and resolving complex issues. Contributed to this document as well. They also integrated Hydra for configuration management.
-- Student 1215036 focused on the data pipeline, managing data downloading, preprocessing, and version control using DVC. They also handled the integration of data into the training process, ensuring that the datasets were correctly formatted and accessible. Helped with setting up the structure of the repository. Contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks. They also contributed to debugging and resolving complex issues. Contributed to this document as well. 
-- Student 12285004 was responsible for setting up the initial project, including repository creation, cookie cutter project structure and setting up a WandB team. They ensured that the development environment was standardized and reproducible. Developed configuration files, contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks quality checks using pytest. Contributed to this document as well. 
-- Student 12691013 was responsible for the experiment running on wandb. Contributed to quality checks quality checks using pytest. Contributed to this document as well. 
+- Student 1215036 focused on the data pipeline, managing data downloading, preprocessing, and version control using DVC. They also handled the integration of data into the training process, ensuring that the datasets were correctly formatted and accessible. Helped with setting up the structure of the repository. Contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks. They also contributed to debugging and resolving complex issues. Contributed to this document as well. Contributed to pruning, compiling and fast inference quantization.
+- Student 12285004 was responsible for setting up the initial project, including repository creation, cookie cutter project structure and setting up a WandB team. They ensured that the development environment was standardized and reproducible. Developed configuration files, contributed to (CI/CD) pipeline, setting up GitHub Actions for automated testing, linting, and quality checks quality checks using pytest. Contributed to this document as well. Contributed to deployment of the model and dockerfiles to the cloud. Contributed to several model deployment files. Contributed to PytorchLightning model inference.
+- Student 12691013 was responsible for the experiment running on wandb. Contributed to quality checks quality checks using pytest. Contributed to this document as well. Contributed to model monitoring for both locally and on Cloud.Contributed to local dockerfile building and testing. Contributed to several model deployment files. Contributed to Lightning related files and Contributed to Cloud Triggers. Contributed to extensive online documentation checking.
 
 All members contributed to the coding, testing, and documentation processes, ensuring a cohesive and well-documented project. We communicated at every step of the way, in a WhatsApp group and in regular in-person meetings, to stay informed on what other group members were working on, and enable smooth project development by never losing track of our goal. In this way, we also avoided conficts and split the roles of the team.
