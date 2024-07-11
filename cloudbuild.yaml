@@ -1,5 +1,0 @@
-steps:
-    - name: 'gcr.io/cloud-builders/docker'
-      args: ['build', '-t', 'europe-west10-docker.pkg.dev/lovely-aurora-423308-i7/pokemon-image-test/dvc_aloha:latest', '-f', 'datatest.dockerfile', '.']
-    - name: 'gcr.io/cloud-builders/docker'
-      args: ['push', 'europe-west10-docker.pkg.dev/lovely-aurora-423308-i7/pokemon-image-test/dvc_aloha:latest']

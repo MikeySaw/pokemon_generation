@@ -1,4 +1,0 @@
-[core]
-    remote = storage1
-['remote "storage1"']
-    url = gs://pokemon_unlabled/

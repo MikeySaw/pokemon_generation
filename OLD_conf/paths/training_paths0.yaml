@@ -1,3 +1,0 @@
-training_data: data/processed/pokemon.pth
-model_folder: model
-model_name: model0
