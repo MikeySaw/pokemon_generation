@@ -37,6 +37,14 @@ datasets
 diffusers
 kornia==0.6
 
+fastapi
+uvicorn
+
+nvgpu
+
+torchserve
+torch-model-archiver
+torh-workflow-archiver
 
 # the following libraries are required to push the huggingface dataset to the hub
 huggingface_hub

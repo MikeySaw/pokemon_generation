@@ -289,7 +289,7 @@ Since we are not going to train the whole model on _GCloud Compute Engine_ engin
 Try to run the following command to see if we could successfully create a compute engine with GPU support:
 ```shell
 gcloud compute instances create adios1 \
---zone="us-west4-a" \
+--zone="asia-northeast3-c" \
 --image-family="pytorch-latest-gpu" \
 --image-project=deeplearning-platform-release \
 --accelerator="type=nvidia-tesla-t4,count=1" \
@@ -310,6 +310,27 @@ message: The zone 'projects/PROJ_ID/zones/ZONE' does not
   have enough resources available to fulfill the request.  Try a different zone, or
   try again later.
 ```
+Luckily, we got a GPU from `asia-northeast3-c`, let's `ssh` to the server and have fun there!
+
+To ssh to the server, simply run the following commands:
+```shell
+gcloud compute ssh --zone "asia-northeast3-c" "adios1" --project "lovely-aurora-423308-i7"
+```
+Next, since we are going to train our model on the Google Cloud, please run the following command to install a pre-defined docker image:
+```shell
+# check all the deep learning related pre-defined docker images
+gcloud container images list --repository="gcr.io/deeplearning-platform-release"
+
+# check the lovely pytorch with GPU support!
+python -c "import torch; print(torch.__version__)"
+
+# check the lovely nvidia-driver we have!
+nvidia-smi
+```
+Now we have everything prepared already, this would be exactly the same as deploying a model on our own server, simply follow the `Train Model` section in this README.md file, happy coding!😊
+
+
+#### Vertex AI training command! 🌩️ <a href="#top">[Back to Top]</a>
 We have to use _Vertex AI_ if there is no computation resources available at the moment. \
 we define our training config file in `job_config.yaml`, then we will build and push the training docker image into the `Artifact Registry`:
 ```shell
@@ -317,6 +338,41 @@ gcloud ai custom-jobs create \
   --region=us-central1 \
   --display-name=pokemon-training-job \
   --config=job_config.yaml
+```
+
+### Deploy Model Via FastAPI <a href="#top">[Back to Top]</a>
+Wanna see an image which should be a pokemon but does not looks like a pokemon at all? 👀 Simply run the following commands!
+```shell
+# Deploy the model locally via FastAPI!
+python app.py
+```
+You will see from the terminal that our application is already there!
+To generate one image based on your prompt, simply go to this link from your browser: `http://localhost:8080/docs `, click the `try it out` button, the replace the `str` into a real prompt, it will generate a pokemon image for you!
+
+Feel angry about why the generated images does not look like a pokemon? 😡 Try the finetuned version! Simply run the following commands to deploy a fine-tuned stable diffusion model locally for your lovely pokemon!
+```shell
+# Deploy a fine-tuned model!
+python finetune_app.py
+```
+Simply do the same thing as before, then download the generated image, have fun with this pokemon app!🐻
+
+### Serve Model Locally <a href="#top">[Back to Top]</a>
+To serve our latent diffusion model locally, simply run the following commands!
+```shell
+torch-model-archiver --model-name latent_diffusion   \
+--version 1.0  \
+--model-file pokemon_stable_diffusion/latent_diffusion.py  \
+--handler latent_diffusion_handler.py  \
+--extra-files "conf/ddpm_config.yaml,sd-v1-4-full-ema.ckpt"  \
+--requirements-file real_requirements.txt
+```
+Now we have a `latent_diffusion.mar` file, which can be served with `torchserve` package, run the following commands to make it work! 🈺
+```shell
+torchserve --start --ncs --model-store localserve --models latent_diffusion.mar --ts-config config.properties
+```
+We also offer you a _one-step solution_ for using this `torchserve` model, simply run this file and have fun!
+```shell
+python torchserverun.py
 ```
 
 ### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a>
@@ -334,16 +390,19 @@ You need to authorize before you start to build and push your cloud deployment d
 ```shell
 gcloud auth login
 gcloud auth configure-docker
-gcloud auth configure-docker LOCATION.pkg.dev
+gcloud auth configure-docker LOCATION.docker.pkg.dev
 
 # verify you are in the correct project
 gcloud config set project YOUR_PROJ_ID
 
 # If you havn't build the dockerfile you want to deploy, run the following commands:
 docker build -f gcloudrun.dockerfile . -t gcp_test_app:latest
+
+# In our case: docker tag gcp_test_app us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app
 docker tag gcp_test_app LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
 
 # To push the docker image to your Artifact Registry, run this command
+# In our case: docker push us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app
 docker push LOCATION-docker.pkg.dev/YOUR_PROJ_ID/CUSTOM_NAME/gcp_test_app:latest
 ```
 After you successfully pushed your images already, run the following commands in terminal to deploy your model on _Cloud Run_
@@ -356,6 +415,16 @@ gcloud run deploy YOUR_SERVICE_NAME   \
 --memory 32Gi   \
 --cpu 8 \
 ``` 
+In our case, this command would be:
+```shell
+gcloud run deploy latent-diffusion-service   \
+--image us-central1-docker.pkg.dev/lovely-aurora-423308-i7/gcf-artifacts/gcp_test_app   \
+--platform managed   \
+--region us-central1   \
+--allow-unauthenticated   \
+--memory 32Gi   \
+--cpu 8 
+```
 
 The terminal should then return a message like this:
 ```shell
