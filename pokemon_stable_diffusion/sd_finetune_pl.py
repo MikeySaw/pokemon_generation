@@ -33,6 +33,11 @@ def main(path: str):
     config = OmegaConf.load(path)
     pl.seed_everything(config.train.seed)
 
+    wandb.init(
+        **config.wandb,
+        config=OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True),
+    )
+
     # Initialize WandB logger
     wandb_logger = WandbLogger(project=config.train.project_name, log_model="all")
     wandb_logger.experiment.config.update(OmegaConf.to_container(config, resolve=True)) # correct, noqa
