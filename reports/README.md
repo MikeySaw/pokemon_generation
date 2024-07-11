@@ -239,9 +239,11 @@ We implemented seven tests in total.
 >
 > Answer:
 
-Our current code coverage for this course project is 31%. While this shows that a portion of our code is covered by tests, it is important to consider the context of a course project. In educational settings, the emphasis is often on learning and understanding concepts rather than achieving high production-level metrics like code coverage.
+Our current code coverage for this project is 31%. This means that only a part of our code is being tested. Even if we reach 100% code coverage, it doesn't mean our code is free of errors. Code coverage shows how much of the code is tested, but it doesn't catch all possible bugs or mistakes.
 
-Nevertheless, striving to increase our coverage beyond 31% would still be beneficial. It allows us to practice writing more comprehensive tests, which can help in identifying and fixing potential issues earlier in the development process. This approach not only improves our understanding of testing methodologies but also contributes to producing more reliable and robust software, which is valuable even in a course project context.
+Having high code coverage is good because it helps us find and fix issues early. However, it is not the only thing that matters. Good testing also involves checking how different parts of the code work together and how the software behaves in real-world situations.
+
+In summary, while it's important to increase our code coverage from 31%, we also need to focus on other testing methods and practical use cases to make sure our software is reliable and error-free.
 
 ### Question 9
 
