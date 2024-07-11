@@ -218,7 +218,7 @@ We added linting checks that every time a new pull request is created. For this 
 
 We implemented seven tests in total. 
 - `test_data.py` checks if both the Torch and Huggingface datasets are created properly, including train/test/val splits and tensor shapes for the Torch dataset. It also verifies the dataset length and ensures 'image' and 'text' keys exist in all splits for the Huggingface dataset. 
-- `test_ddpm_checkpoint.py`: checks if the DDPM model handles conditioning correctly. It ensures that the output is consistent with the conditioned input, verifying the model's ability to process conditional data accurately.
+- `test_ddpm_checkpoint.py`: verifies that the DDPM model can save and load checkpoints during training. It ensures that the model's state dictionaries match before and after loading, and that training can resume correctly without errors.
 - `test_ddpm_conditioning.py` checks if the DDPM model handles conditioning correctly, ensuring consistent output with the conditioned input. 
 - `test_ddpm_initialization.py` verifies the initialization of the DDPM model with various configurations. It ensures that the model can handle different setups and that a forward pass with dummy data produces an expected output.
 - `test_ddpm_model.py` ensures the DDPM model can process input data through its forward pass. It verifies that the model produces the expected output shape, confirming its functional integrity.
