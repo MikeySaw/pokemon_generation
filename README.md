@@ -211,6 +211,11 @@ To build the training dockerfile, please run the following commands:
 docker build -f sd_finetune.dockerfile . -t fd_train:latest
 ```
 
+To overwrite an entrypoint of the dockerfile, simply run the following commands:
+```shell
+docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_TOKEN --entrypoint python fd_train:latest pokemon_stable_diffusion/sd_finetune.py
+```
+
 For `MAC A1/A2` chip user, you may consider to use this command if you want to deploy the model on cloud later:
 ```shell
 docker build --platform linux/amd64 -f sd_finetune.dockerfile . -t fd_train:latest
