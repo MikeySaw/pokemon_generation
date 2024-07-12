@@ -233,7 +233,7 @@ __Alert! 🚨The Stable Diffusion fine-tuning needs at least 18 GB RAM GPU to ru
 ```shell
 docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY fd_train:latest
 ```
-Please replace the `YOUR_WANDB_KEY` with your own `wandb` authorization token, to get your own token, simply click the following link: [wandb authorization link](wandb.ai/authorize), then login and copy paste your own authorization token.
+Please replace the `YOUR_WANDB_KEY` with your own `wandb` authorization token, to get your own token, simply click the following link: [wandb authorization link](https://wandb.ai/authorize), then login and copy paste your own authorization token.
 Please do not forget the `--gpus all` flags, this will automatically🪄activate your _NVIDIA GPU_ if your machine has one. Enjoy the fast training! 🏄‍♀️
 
 #### Docker Debug Guidance🧑🏿‍🔧
