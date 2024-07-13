@@ -384,6 +384,16 @@ python torchserverun.py
 ```
 
 ### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a>
+#### Deploy model via Google Cloud Function
+To run your deployed model on Cloud Function via command line, simply run the following command line:
+```shell
+curl -X POST -F "file=@/path/to/your/image.jpg" https://REGION-PROJECT_ID.cloudfunctions.net/predict
+
+# In our case, this command would be: 
+curl -X POST -F "file=@car.png" https://us-central1-lovely-aurora-423308-i7.cloudfunctions.net/predict
+```
+
+#### Deploy model via Google Cloud Run
 To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
 Run the following command to enable the _Cloud Run_ service via command line:
 ```shell
