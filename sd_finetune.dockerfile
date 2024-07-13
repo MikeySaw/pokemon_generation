@@ -38,7 +38,7 @@ RUN pip install -r real_requirements.txt --no-cache-dir
 # the following command will reuse the cache, this will make the installation process faster
 # RUN --mount=type=cache,target=~/pip/.cache pip install -r requirements.txt --no-cache-dir
 
-ENTRYPOINT ["python", "/pokemon_stable_diffusion/sd_fintune.py"]
+ENTRYPOINT ["python", "/pokemon_stable_diffusion/sd_finetune.py"]
 # ENTRYPOINT ["python", "-u", "pokemon_generation/modeling/train_example.py", "train"]
 # run the following commands to use the file:
 #    sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY trainer:latest
