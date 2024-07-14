@@ -362,16 +362,27 @@ python torchserverun.py
 ```
 
 ### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a>
-#### Deploy model via Google Cloud Function
+#### Deploy model via Google Cloud Function 🥶
+To deploy a function via `cloud function`, please follow the following steps:
+
+Go to the `cloud function` first, then click the `create function` button, then for `Authentication`, choose `Allow unauthenticated invocations`, for the following section `Runtime, build, connections and security settings`, change those three choices: `Memory Allocated, CPU and Timeout`, then click `next`, then change the runtime to `python 3.X`, change the `requirements.txt` and `main.py` content, then click `test function` button, if there is no error, simply click the `deploy` button at the left corner, then we finish the deployment!
+
 To run your deployed model on Cloud Function via command line, simply run the following command line:
 ```shell
 curl -X POST -F "file=@/path/to/your/image.jpg" https://REGION-PROJECT_ID.cloudfunctions.net/predict
 
 # In our case, this command would be: 
-curl -X POST -F "file=@car.png" https://us-central1-lovely-aurora-423308-i7.cloudfunctions.net/predict
+# curl -X POST -F "file=@IMAGE_PATH" https://us-central1-lovely-aurora-423308-i7.cloudfunctions.net/predict
 ```
 
-#### Deploy model via Google Cloud Run
+If you encounter an issue during using the `cloud function` commands here, simply run the following commands to preprocess input images first:
+```shell
+# Your images should be saved into a folder
+python file_pre.py YOUR_IMAGE_FOLDER_PATH/ YOUR IMAGE_SAVING_PATH
+```
+This will fullfill the images requirements for prediction by using the deployed `cloud function`
+
+#### Deploy model via Google Cloud Run 💵
 To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
 Run the following command to enable the _Cloud Run_ service via command line:
 ```shell
