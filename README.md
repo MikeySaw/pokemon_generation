@@ -56,7 +56,7 @@ __Please always open a pull request if you want to merge your modification to th
   - [Github Actions & Continuous Integration & Docker Build Workflow](#Github-actions--continuous-integration--docker-build-workflow-)
   - [Pre-Commit Hook](#Pre-commit-hook-)
   - [Pytest Test](#Pytest-test-)
-  - [Coverage](#Coverage)
+  - [Coverage](#Coverage-)
   - [Dockerfile Test](#Dockerfile-test-)
   - [Dockerfile Building Up commands](#Dockerfile-building-up-commmands-)
 - [Cloud Training commands](#Cloud-training-commands-)
@@ -66,7 +66,7 @@ __Please always open a pull request if you want to merge your modification to th
   - [Deploy model via Google Cloud Function](#Deploy-model-via-google-cloud-function-)
   - [Deploy model via Google Cloud Run](#Deploy-model-via-google-cloud-run-)
 - [Data Shifting Check](#Data-shifting-check)
-- [Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading](#Pytorch-lightning-training-profiling-ddp-and-distributed-data-loading-%EF%B8%8F)
+- [Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading](#Pytorch-lightning-training-profiling-ddp-and-distributed-data-loading-)
 - [Model Pruning&Compiling&Quantization](#Model-pruningcompilingquantization-)
 - [Run model training locally](#Run-model-training-locally)
 - [Run model training in a docker container](#Run-model-training-in-a-docker-container)
@@ -74,7 +74,7 @@ __Please always open a pull request if you want to merge your modification to th
 
 ## Model Training 🌋 <a href="#top">[Back to Top]</a> <a name="model-training"></a>
 _TL, DR. I just want to train my model!_ 🤘
-### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a> <a name="Finetune-a-stable-diffusion"></a>
+### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a> <a name="Finetune-a-stable-diffusion-"></a>
 To finetune a Stable Diffusion Model simply run the following commands:
 ```shell
 # Get the repo!
@@ -219,7 +219,7 @@ def test_...(*args, **kwargs):
     ...
 ```
 
-### Coverage ⌛ <a href="#top">[Back to Top]</a> <a name="coverage"></a>
+### Coverage ⌛ <a href="#top">[Back to Top]</a> <a name="coverage-"></a>
 To calculate the coverage rate of all the `pytest` related tests, simply run the following commands:
 ```shell
 coverage run -m pytest tests/
@@ -228,7 +228,7 @@ coverage run -m pytest tests/
 coverage report
 ``` 
 
-### Dockerfile Test 🐋 <a href="#top">[Back to Top]</a> <a name="dockerfile test"></a>
+### Dockerfile Test 🐋 <a href="#top">[Back to Top]</a> <a name="dockerfile-test-"></a>
 
 please read the `test_trainer.dockfile` for more details, this file is used to be a showcase for building everything, aka `dvc`&`CUDA`&`ENTRYPOINT` in one dockerfile.
 to make this dockerfile easier to understand, a toy example is added to the `src/model/train_example.py`, this is the entrypoint of the dockerfile.
@@ -244,7 +244,7 @@ sudo docker run --gpus all -e WANDB_API_KEY=YOUR_WANDB_KEY test_trainer:latest
 
 __make sure to replace the `YOUR_WANDB_KEY` here with your real wandb personel token!__
 
-### Dockerfile Building Up commmands 🐳 <a href="#top">[Back to Top]</a> <a name="Dockerfile Building Up commmands"></a>
+### Dockerfile Building Up commmands 🐳 <a href="#top">[Back to Top]</a> <a name="dockerfile-building-up-commmands-"></a>
 To build the training dockerfile, please run the following commands:
 ```shell
 # If you encounter issues, consider use `sudo` before the whole command
@@ -323,7 +323,7 @@ sudo systemctl restart docker
 ```
 After running those commands, your dockerfile should now work with GPU support very smoothly!🏎️
 
-### Cloud Training commands ☁️ <a href="#top">[Back to Top]</a> <a name="Cloud Training commands"></a>
+### Cloud Training commands ☁️ <a href="#top">[Back to Top]</a> <a name="cloud-training-commands-"></a>
 To start the cloud training in _GCloud Compute Engine_ with _Nvidia GPU_ support, simply run the following commands to check the available GPUs in different ZONE first:
 ```shell
 gcloud compute accelerator-types list
@@ -383,7 +383,7 @@ gcloud ai custom-jobs create \
   --config=job_config.yaml
 ```
 
-### Deploy Model Via FastAPI 🧑‍💻 <a href="#top">[Back to Top]</a> <a name="Deploy Model Via FastAPI"></a>
+### Deploy Model Via FastAPI 🧑‍💻 <a href="#top">[Back to Top]</a> <a name="deploy-model-via-fastAPI-"></a>
 Wanna see an image which should be a pokemon but does not looks like a pokemon at all? 👀 Simply run the following commands!
 ```shell
 # Deploy the model locally via FastAPI!
@@ -404,7 +404,7 @@ If you want to check the monitoring of the deployed application, simply go to th
 http://localhost:8080/metrics
 ```
 
-### Serve Model Locally 👩‍💻 <a href="#top">[Back to Top]</a> <a name="Serve Model Locally"></a>
+### Serve Model Locally 👩‍💻 <a href="#top">[Back to Top]</a> <a name="serve-model-locally-"></a>
 To serve our latent diffusion model locally, simply run the following commands!
 ```shell
 torch-model-archiver --model-name latent_diffusion   \
@@ -423,7 +423,7 @@ We also offer you a _one-step solution_ for using this `torchserve` model, simpl
 python torchserverun.py
 ```
 
-### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a> <a name="Deploy model via Google Cloud"></a>
+### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a> <a name="deploy-model-via-google-cloud-"></a>
 #### Deploy model via Google Cloud Function 🥶 <a name="Deploy model via Google Cloud Function"></a>
 To deploy a function via `cloud function`, please follow the following steps:
 
@@ -444,7 +444,7 @@ python file_pre.py YOUR_IMAGE_FOLDER_PATH/ YOUR IMAGE_SAVING_PATH
 ```
 This will fullfill the images requirements for prediction by using the deployed `cloud function`
 
-#### Deploy model via Google Cloud Run 💵 <a name="Deploy model via Google Cloud Run"></a>
+#### Deploy model via Google Cloud Run 💵 <a name="deploy-model-via-google-cloud-run-"></a>
 To deploy your trained model with trained model weights on Google Cloud, you need to have one `Artifact Registry` and enable the `Google Cloud Run` service via command line or _Cloud console_.
 Run the following command to enable the _Cloud Run_ service via command line:
 ```shell
@@ -513,14 +513,14 @@ sudo usermod -aG docker $USER
 Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
 After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
-### Data Shifting Check <a href="#top">[Back to Top]</a> <a name="Data Shifting Check"></a>
+### Data Shifting Check <a href="#top">[Back to Top]</a> <a name="data-shifting-check"></a>
 To check the model robustness torwards data drifting during the image generation, simply run the following commands:
 ```shell
 python data_drifting
 google-chrome image_drift_report.html
 ```
 
-### Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading 🏎️ <a href="#top">[Back to Top]</a> <a name="Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading"></a>
+### Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading 🏎️ <a href="#top">[Back to Top]</a> <a name="Pytorch-lightning-training-profiling-ddp-and-distributed-data-loading-"></a>
 To train the model by using the `lighting` package,  simply run the following command:
 ```shell
 python pokemon_stable_diffusion/sd_finetune_pl.py
@@ -528,7 +528,7 @@ python pokemon_stable_diffusion/sd_finetune_pl.py
 The `lightning` package has one parameter inside the `Trainer` for `profiler`, simply set it up by `Trainer(profiler="simple", ...)`, this will return the profiling report at the end of the training.
 To train the model with `DDP` strategy, simply add change the `ddp` flag inside the argparse as `True`, this will activate `DDP` training with `2` GPUs activated for training, for data loading, since in all the files the `num_workers` related parameter are setted up with value larger than `1`, we are always using the data distributed loading.
 
-### Model Pruning&Compiling&Quantization 🪄 <a href="#top">[Back to Top]</a> <a name="Model Pruning&Compiling&Quantization"></a>
+### Model Pruning&Compiling&Quantization 🪄 <a href="#top">[Back to Top]</a> <a name="model-pruning&compiling&quantization-"></a>
 To get a "smaller" version model with model compiling, simply run the following commands:
 ```shell
 python pruning.py
