@@ -72,7 +72,7 @@ __Please always open a pull request if you want to merge your modification to th
 - [Run model training in a docker container](#Run-model-training-in-a-docker-container)
 - [Workspace cleaning and garbage collection](#Workspace-cleaning-and-garbage-collection)
 
-## Model Training 🌋 <a href="#top">[Back to Top]</a> <a name="model-training"></a>
+## Model Training 🌋 <a href="#top">[Back to Top]</a> <a name="model-training-"></a>
 _TL, DR. I just want to train my model!_ 🤘
 ### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a> <a name="Finetune-a-stable-diffusion-"></a>
 To finetune a Stable Diffusion Model simply run the following commands:
@@ -198,11 +198,11 @@ the `ci.yaml` file would be responsible for `continuous integration` operation, 
 the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo.
 When pull/merge to the github repo, the Google Cloud will automatically trigger the docker image build workflow, the `cloudbuild.yaml` dockerfile will build a dockerfile for testing `dvc pull` command for getting the data.
 
-#### Pre-Commit Hook 🕵️ <a href="#top">[Back to Top]</a> <a name="Pre-commit-hook-%EF%B8%8F"></a> 
+#### Pre-Commit Hook 🕵️ <a href="#top">[Back to Top]</a> <a name="Pre-commit-hook-"></a> 
 
 To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
-### Pytest Test ✔️ <a href="#top">[Back to Top]</a> <a name="Pytest-test-%EF%B8%8F"></a>
+### Pytest Test ✔️ <a href="#top">[Back to Top]</a> <a name="Pytest-test-></a>
 
 To run `.py` files related to the  `pytest` package, simply run the following command:
 
@@ -383,7 +383,7 @@ gcloud ai custom-jobs create \
   --config=job_config.yaml
 ```
 
-### Deploy Model Via FastAPI 🧑‍💻 <a href="#top">[Back to Top]</a> <a name="deploy-model-via-fastAPI-"></a>
+### Deploy Model Via FastAPI 🧑‍💻 <a href="#top">[Back to Top]</a> <a name="deploy-model-via-fastapi-"></a>
 Wanna see an image which should be a pokemon but does not looks like a pokemon at all? 👀 Simply run the following commands!
 ```shell
 # Deploy the model locally via FastAPI!
@@ -424,7 +424,7 @@ python torchserverun.py
 ```
 
 ### Deploy model via Google Cloud🧨 <a href="#top">[Back to Top]</a> <a name="deploy-model-via-google-cloud-"></a>
-#### Deploy model via Google Cloud Function 🥶 <a name="Deploy model via Google Cloud Function"></a>
+#### Deploy model via Google Cloud Function 🥶 <a name="deploy-model-via-google-cloud-function-"></a>
 To deploy a function via `cloud function`, please follow the following steps:
 
 Go to the `cloud function` first, then click the `create function` button, then for `Authentication`, choose `Allow unauthenticated invocations`, for the following section `Runtime, build, connections and security settings`, change those three choices: `Memory Allocated, CPU and Timeout`, then click `next`, then change the runtime to `python 3.X`, change the `requirements.txt` and `main.py` content, then click `test function` button, if there is no error, simply click the `deploy` button at the left corner, then we finish the deployment!
@@ -513,7 +513,7 @@ sudo usermod -aG docker $USER
 Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
 After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
-### Data Shifting Check <a href="#top">[Back to Top]</a> <a name="data-shifting-check"></a>
+### Data Shifting Check <a href="#top">[Back to Top]</a> <a name="data-shifting-check-"></a>
 To check the model robustness torwards data drifting during the image generation, simply run the following commands:
 ```shell
 python data_drifting
@@ -528,7 +528,7 @@ python pokemon_stable_diffusion/sd_finetune_pl.py
 The `lightning` package has one parameter inside the `Trainer` for `profiler`, simply set it up by `Trainer(profiler="simple", ...)`, this will return the profiling report at the end of the training.
 To train the model with `DDP` strategy, simply add change the `ddp` flag inside the argparse as `True`, this will activate `DDP` training with `2` GPUs activated for training, for data loading, since in all the files the `num_workers` related parameter are setted up with value larger than `1`, we are always using the data distributed loading.
 
-### Model Pruning&Compiling&Quantization 🪄 <a href="#top">[Back to Top]</a> <a name="model-pruning&compiling&quantization-"></a>
+### Model Pruning&Compiling&Quantization 🪄 <a href="#top">[Back to Top]</a> <a name="model-pruningcompilingquantization-"></a>
 To get a "smaller" version model with model compiling, simply run the following commands:
 ```shell
 python pruning.py
