@@ -122,7 +122,7 @@ You may need to manually install those two packages if the issues persist.
 
 ## Model Preparation 🛸 <a name="model-preparation-"></a>
 
-### Data Download Part 🚚 <a href="#top">[Back to Top]</a> <a name="Data Download Part-"></a>
+### Data Download Part 🚚 <a href="#top">[Back to Top]</a> <a name="data-download-part-"></a>
 
 Please run `pip install -r requirements.txt` to install all the dependencies right __now__, we will use `environment.yml` file __later__. \
 You need a `kaggle.json` file to activate kaggle package and its related commands, for example `kaggle --version`. \
@@ -133,7 +133,7 @@ chmod +x get_images.sh
 bash get_images.sh IMAGE_FOLDER.zip DESTINATION_FOLDER
 ```
 
-### Data Version Control ⚙️ <a href="#top">[Back to Top]</a> <a name="Data-version-control-%EF%B8%8F"></a>
+### Data Version Control ⚙️ <a href="#top">[Back to Top]</a> <a name="data-version-control-"></a>
 
 run the following commands to test if `dvc` is working fine with your enviroment, please pin your `dvc` version to `3.50.1` so that we are using the same version not different ones. This will avoid version conflict problems during the dockerfile building phase. We are also going to use __Google Cloud Storage__ as our data remote storage. To do so, simply run the following commands:
 
@@ -147,7 +147,7 @@ pip install dvc-gs
 dvc pull
 ```
 
-### Reproduce Dataset creation 🖼️ <a href="#top">[Back to Top]</a> <a name="reproduce-dataset-creation-%EF%B8%8F"></a>
+### Reproduce Dataset creation 🖼️ <a href="#top">[Back to Top]</a> <a name="reproduce-dataset-creation-"></a>
 
 If you want to create a dataset with your own images run the following. This will generate captions for your images, move the images and created jsonl files to their respective train/test/val folders and create a dataset for you. Make sure to have your images in the `data/raw` directory:
 
@@ -191,7 +191,7 @@ We can change the config settings during the _training/sampling_ in command line
 python train.py optimizer=sgd
 ```
 
-### Github Actions & Continuous Integration & Docker Build Workflow 🐝 <a href="#top">[Back to Top]</a> <a name="Github-actions--continuous-integration--docker-build-workflow-"></a>
+### Github Actions & Continuous Integration & Docker Build Workflow 🐝 <a href="#top">[Back to Top]</a> <a name="github-actions--continuous-integration--docker-build-workflow-"></a>
 
 For github actions related file, please check the `.github/workflows`, this folder includes all the github actions which will be trigged when we push/pull into our repo, to be more specific about those files, here is a brief introduction about what those files are doing: \
 the `ci.yaml` file would be responsible for `continuous integration` operation, trigger this github action file will trigger the `tests` folder and all the `pytest` files inside this repo.
