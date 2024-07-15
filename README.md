@@ -120,7 +120,7 @@ You may encounter issues when you install `requirements.txt` via command line. T
 ```
 You may need to manually install those two packages if the issues persist.
 
-## Model Preparation 🛸 <a name="Model Preparation-"></a>
+## Model Preparation 🛸 <a name="model-preparation-"></a>
 
 ### Data Download Part 🚚 <a href="#top">[Back to Top]</a> <a name="Data Download Part-"></a>
 
@@ -147,7 +147,7 @@ pip install dvc-gs
 dvc pull
 ```
 
-### Reproduce Dataset creation 🖼️ <a href="#top">[Back to Top]</a> <a name="Reproduce-dataset-creation-%EF%B8%8F"></a>
+### Reproduce Dataset creation 🖼️ <a href="#top">[Back to Top]</a> <a name="reproduce-dataset-creation-%EF%B8%8F"></a>
 
 If you want to create a dataset with your own images run the following. This will generate captions for your images, move the images and created jsonl files to their respective train/test/val folders and create a dataset for you. Make sure to have your images in the `data/raw` directory:
 
@@ -160,7 +160,7 @@ python src/data/create_data_splits.py
 python src/data/make_dataset.py
 ```
 
-### Hydra Test 👾 <a href="#top">[Back to Top]</a> <a name="Hydra-test-"></a>
+### Hydra Test 👾 <a href="#top">[Back to Top]</a> <a name="hydra-test-"></a>
 
 please check the `config/` folder for different hyperparameter settings, to add your own experiment hyperparameters, simply add another `yaml` file inside the `config/` folder, please beware of the required formats of the hyperparameter yaml files, you need to add this \
 
