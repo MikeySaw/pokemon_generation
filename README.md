@@ -15,7 +15,8 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 
 Everyone contributed equal and faily during the whole project! 🙌🙌🙌
 
-## Experiment Command Lines Guidance
+## Contribution Guidance
+Our project has been open-sourced now, if you want to contribute to our project, please follow the following instructions. Have fun coding!
 
 ### Starting Point Alarm! 🚨 <a href="#top">[Back to Top]</a>
 
@@ -40,7 +41,38 @@ pre-commit run --files YOUR_FILE_NAME
 # Then do the normal procedure 💯
 # git add / git commit / git push ...
 ```
-## Model Training 🌋 <a href="#top">[Back to Top]</a> 
+__Please always open a pull request if you want to merge your modification to the repo!__ 🤗
+
+## Table of Contents
+
+- [Model Training](#model-training-)
+  - [Finetune a Stable Diffusion](#finetune-a-stable-diffusion-)
+  - [Test Stable Diffusion Model with a dummy input](#test-stable-diffusion-model-with-a-dummy-input-)
+- [Model Preparation](#model-preparation-)
+  - [Data Download Part](#data-download-part-)
+  - [Data Version Control](#data-version-control-%EF%B8%8F)
+  - [Reproduce Dataset creation](#reproduce-dataset-creation-%EF%B8%8F)
+  - [Hydra Test](#hydra-test-)
+  - [Github Actions & Continuous Integration & Docker Build Workflow](#github-actions--continuous-integration--docker-build-workflow-)
+  - [Pre-Commit Hook](#pre-commit-hook-%EF%B8%8F)
+  - [Pytest Test](#pytest-test-%EF%B8%8F)
+  - [Coverage](#Coverage)
+  - [Dockerfile Test](#dockerfile-test-)
+  - [Dockerfile Building Up commands](#dockerfile-building-up-commmands-)
+- [Cloud Training commands](#cloud-training-commands-%EF%B8%8F)
+- [Deploy Model Via FastAPI](#deploy-model-via-fastapi-)
+- [Serve Model Locally](#serve-model-locally-)
+- [Deploy model via Google Cloud](#deploy-model-via-google-cloud)
+  - [Deploy model via Google Cloud Function](#deploy-model-via-google-cloud-function-)
+  - [Deploy model via Google Cloud Run](#deploy-model-via-google-cloud-run-)
+- [Data Shifting Check](#data-shifting-check)
+- [Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading](#pytorch-lightning-training-profiling-ddp-and-distributed-data-loading-%EF%B8%8F)
+- [Model Pruning&Compiling&Quantization](#model-pruningcompilingquantization-)
+- [Run model training locally](#run-model-training-locally)
+- [Run model training in a docker container](#run-model-training-in-a-docker-container)
+- [Workspace cleaning and garbage collection](#workspace-cleaning-and-garbage-collection)
+
+## Model Training 🌋 <a href="#top">[Back to Top]</a> <a name="model-training"></a>
 _TL, DR. I just want to train my model!_ 🤘
 ### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a>
 To finetune a Stable Diffusion Model simply run the following commands:
@@ -54,7 +86,7 @@ conda create -n pokemon python==3.11
 conda activte pokemon
 pip install -r real_requirements.txt
 
-# Get the data!
+# Get the data and the origin model weights!
 dvc pull
 
 # Train the model!
@@ -79,6 +111,14 @@ python pokemon_stable_diffusion/latent_diffusion.py
 This will run the `dummy training` process based on a `dummy image` and a `dummy txt`. \
 You will see the generated images `sample_0.png`, if the code is executed correctly.
 __Alert!🚨 You need to work on a very expensive server if you want to test this code!(at least 24GB RAM)__
+
+### Installaton Debug Guidance
+You may encounter issues when you install `requirements.txt` via command line. This would be caused by those following lines inside the `requirements.txt` file:
+```shell
+-e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+-e git+https://github.com/openai/CLIP.git@main#egg=clip
+```
+You may need to manually install those two packages if the issues persist.
 
 ## Model Preparation 🛸
 
@@ -107,7 +147,7 @@ pip install dvc-gs
 dvc pull
 ```
 
-### Reproduce Dataset creation
+### Reproduce Dataset creation 🖼️ <a href="#top">[Back to Top]</a>
 
 If you want to create a dataset with your own images run the following. This will generate captions for your images, move the images and created jsonl files to their respective train/test/val folders and create a dataset for you. Make sure to have your images in the `data/raw` directory:
 
@@ -158,7 +198,7 @@ the `ci.yaml` file would be responsible for `continuous integration` operation, 
 the `lint.yaml` file would be responsible for `pre-commit` hook, this hook will check all the formats we want to use for our files inside this repo.
 When pull/merge to the github repo, the Google Cloud will automatically trigger the docker image build workflow, the `cloudbuild.yaml` dockerfile will build a dockerfile for testing `dvc pull` command for getting the data.
 
-#### Pre-Commit Hook <a href="#top">[Back to Top]</a>
+#### Pre-Commit Hook 🕵️ <a href="#top">[Back to Top]</a>
 
 To check the detailed configs about the `pre-commit` hook, please check the `.pre-commit-config.yaml` file. If you are not satisfied with the style we are using, simply change settings inside this file!
 
@@ -179,7 +219,7 @@ def test_...(*args, **kwargs):
     ...
 ```
 
-### Coverage ⌛ <a href="#top">[Back to Top]</a>
+### Coverage ⌛ <a href="#top">[Back to Top]</a> <a name="coverage"></a>
 To calculate the coverage rate of all the `pytest` related tests, simply run the following commands:
 ```shell
 coverage run -m pytest tests/
