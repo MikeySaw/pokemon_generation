@@ -13,7 +13,7 @@ In this project we fine-tune a diffusion model on images of Pokémon. The images
 
 ## Acknowledgement
 
-Everyone contributed equal and faily during the whole project! 🙌🙌🙌
+Everyone contributed equal and faily during the whole project! 🙌🙌🙌 
 
 ## Contribution Guidance
 Our project has been open-sourced now, if you want to contribute to our project, please follow the following instructions. Have fun coding!
@@ -46,7 +46,7 @@ __Please always open a pull request if you want to merge your modification to th
 ## Table of Contents
 
 - [Model Training](#Model-training-)
-  - [Finetune a Stable Diffusion](#Finetune-a-stable-diffusion-)
+  - [Finetune a Stable Diffusion model](#Finetune-a-stable-diffusion-model)
   - [Test Stable Diffusion Model with a dummy input](#Test-stable-diffusion-model-with-a-dummy-input-)
 - [Model Preparation](#Model-preparation-)
   - [Data Download Part](#Data-download-part-)
@@ -65,7 +65,7 @@ __Please always open a pull request if you want to merge your modification to th
 - [Deploy model via Google Cloud](#Deploy-model-via-google-cloud)
   - [Deploy model via Google Cloud Function](#Deploy-model-via-google-cloud-function-)
   - [Deploy model via Google Cloud Run](#Deploy-model-via-google-cloud-run-)
-- [Data Shifting Check](#Data-shifting-check)
+- [Data drifting Check](#Data-drifting-check-)
 - [Pytorch Lightning Training, Profiling, DDP and Distributed Data Loading](#Pytorch-lightning-training-profiling-ddp-and-distributed-data-loading-)
 - [Model Pruning&Compiling&Quantization](#Model-pruningcompilingquantization-)
 - [Run model training locally](#Run-model-training-locally)
@@ -74,7 +74,7 @@ __Please always open a pull request if you want to merge your modification to th
 
 ## Model Training 🌋 <a href="#top">[Back to Top]</a> <a name="model-training-"></a>
 _TL, DR. I just want to train my model!_ 🤘
-### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a> <a name="Finetune-a-stable-diffusion-"></a>
+### Finetune a Stable Diffusion 🔥 <a href="#top">[Back to Top]</a> <a name="Finetune-a-stable-diffusion-model"></a>
 To finetune a Stable Diffusion Model simply run the following commands:
 ```shell
 # Get the repo!
@@ -513,7 +513,7 @@ sudo usermod -aG docker $USER
 Please click the following link to find out why we need to do this: [Cloud Run Guidance]( https://cloud.google.com/artifact-registry/docs/docker/authentication), specifically, the following part explained the core idea of this: _Note: If you normally run Docker commands on Linux with sudo, Docker looks for Artifact Registry credentials in /root/.docker/config.json instead of $HOME/.docker/config.json._
 After remove the `sudo` requirements, go to the _Cloud Console_, or just simply click this link [IAM Role](https://console.cloud.google.com/iam-admin/iam), find your own email, then add those roles to your account: `Artifact Registry Administrator`, `Artifact Registry Writer`. You will have no issue for pushig the images after those two steps!☘️
 
-### Data Shifting Check <a href="#top">[Back to Top]</a> <a name="data-shifting-check-"></a>
+### Data drifting Check <a href="#top">[Back to Top]</a> <a name="data-drifting-check-"></a>
 To check the model robustness torwards data drifting during the image generation, simply run the following commands:
 ```shell
 python data_drifting
